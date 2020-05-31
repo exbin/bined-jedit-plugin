@@ -1,0 +1,39 @@
+plugin.BinEdPlugin.name=BinEd
+plugin.BinEdPlugin.author=ExBin Project
+plugin.BinEdPlugin.version=0.2.0
+plugin.BinEdPlugin.docs=docs/index.html
+plugin.BinEdPlugin.description=Binary/hexadecimal editor based on BinEd library.
+plugin.BinEdPlugin.longdescription=description.html
+plugin.BinEdPlugin.depend.0=jedit 04.02.01.00
+plugin.BinEdPlugin.depend.1=jdk 1.4
+plugin.BinEdPlugin.activate=defer
+
+bined.title=BinEd Binary/Hexadecimal Editor
+bined.edit-panel.title=BinEd Edit
+bined.edit-panel.label=BinEd Edit
+bined.edit-panel-toggle.label=BinEd Edit Toggle
+
+# Action labels
+bined.choose-file.label=Choose notepad file
+bined.save-file.label=Save notepad file
+bined.copy-to-buffer.label=Copy notepad to buffer
+
+# window toolbar buttons
+bined.choose-file.icon=Open.png
+bined.save-file.icon=Save.png
+bined.copy-to-buffer.icon=CopyToBuffer.png
+
+# Menu items
+plugin.BinEdPlugin.menu=bined.edit-panel
+
+# Option Panes
+#options.bined.label=Hex Edit
+#plugin.BinEdPlugin.option-pane=bined.edit-panel
+#options.bined.code=new xptracker.options.XPTrackerOptionPane();
+
+# Options
+#options.xptracker.host=localhost
+
+# Error messages
+bined.error.bad-number.title=Bad Hex Value
+bined.error.bad-number.message={0} is not a valid hex value
