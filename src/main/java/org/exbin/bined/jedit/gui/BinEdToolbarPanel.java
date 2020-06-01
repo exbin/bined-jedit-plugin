@@ -192,7 +192,7 @@ public class BinEdToolbarPanel extends javax.swing.JPanel {
         controlToolBar.setFloatable(false);
         controlToolBar.setRollover(true);
 
-        showUnprintablesToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/exbin/bined/netbeans/resources/icons/insert-pilcrow.png"))); // NOI18N
+        showUnprintablesToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/exbin/bined/jedit/resources/icons/insert-pilcrow.png"))); // NOI18N
         showUnprintablesToggleButton.setToolTipText(resourceBundle.getString("showUnprintablesToggleButton.toolTipText")); // NOI18N
         showUnprintablesToggleButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

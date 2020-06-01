@@ -22,6 +22,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JToolBar;
 import org.gjt.sp.jedit.GUIUtilities;
 import org.gjt.sp.jedit.gui.RolloverButton;
 import org.gjt.sp.jedit.jEdit;
@@ -34,8 +35,6 @@ import org.gjt.sp.jedit.jEdit;
  */
 public class BinEdToolPanel extends JPanel {
 
-    public static final String OPTION_PREFIX = "options.bined.";
-
     private final BinEdEditPanel editPanel;
     private JLabel label;
 
@@ -43,6 +42,10 @@ public class BinEdToolPanel extends JPanel {
         this.editPanel = editPanel;
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
+        initComponents();
+    }
+    
+    private void initComponents() {
         Box labelBox = new Box(BoxLayout.Y_AXIS);
         labelBox.add(Box.createGlue());
 
@@ -56,20 +59,44 @@ public class BinEdToolPanel extends JPanel {
 
         add(Box.createGlue());
 
-        add(makeCustomButton("quicknotepad.choose-file", (ActionEvent evt) -> {
+        add(makeCustomButton("bined.choose-file", (ActionEvent evt) -> {
             editPanel.chooseFile();
         }));
-        add(makeCustomButton("quicknotepad.save-file", (ActionEvent evt) -> {
+        add(makeCustomButton("bined.save-file", (ActionEvent evt) -> {
             editPanel.saveFile();
         }));
-        add(makeCustomButton("quicknotepad.copy-to-buffer", (ActionEvent evt) -> {
+        add(makeCustomButton("bined.copy-to-buffer", (ActionEvent evt) -> {
             editPanel.copyToBuffer();
+        }));
+        
+        add(new JToolBar.Separator());
+
+        add(makeCustomButton("bined.undo", (ActionEvent evt) -> {
+            editPanel.performUndo();
+        }));
+
+        add(makeCustomButton("bined.redo", (ActionEvent evt) -> {
+            editPanel.performRedo();
+        }));
+
+        add(new JToolBar.Separator());
+
+        add(makeCustomButton("bined.cut", (ActionEvent evt) -> {
+            editPanel.performCut();
+        }));
+
+        add(makeCustomButton("bined.copy", (ActionEvent evt) -> {
+            editPanel.performCopy();
+        }));
+
+        add(makeCustomButton("bined.paste", (ActionEvent evt) -> {
+            editPanel.performPaste();
         }));
     }
 
     void propertiesChanged() {
         label.setText(editPanel.getFileName());
-        label.setVisible(jEdit.getProperty(OPTION_PREFIX + "show-filepath").equals("true"));
+//        label.setVisible(jEdit.getProperty(OPTION_PREFIX + "show-filepath").equals("true"));
     }
 
     private AbstractButton makeCustomButton(String name, ActionListener listener) {

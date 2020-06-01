@@ -75,7 +75,7 @@ import org.exbin.framework.gui.utils.gui.DefaultControlPanel;
 /**
  * Binary editor options panel.
  *
- * @version 0.2.1 2019/08/21
+ * @version 0.2.0 2019/08/21
  * @author ExBin Project (http://exbin.org)
  */
 @ParametersAreNonnullByDefault

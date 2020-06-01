@@ -9,19 +9,28 @@ plugin.BinEdPlugin.depend.1=jdk 1.4
 plugin.BinEdPlugin.activate=defer
 
 bined.title=BinEd Binary/Hexadecimal Editor
-bined.edit-panel.title=BinEd Edit
-bined.edit-panel.label=BinEd Edit
-bined.edit-panel-toggle.label=BinEd Edit Toggle
+bined.edit-panel.title=BinEd
+bined.edit-panel.label=Edit File
 
 # Action labels
-bined.choose-file.label=Choose notepad file
-bined.save-file.label=Save notepad file
-bined.copy-to-buffer.label=Copy notepad to buffer
+bined.choose-file.label=Choose file
+bined.save-file.label=Save file
+bined.copy-to-buffer.label=Copy file to buffer
+bined.undo.label=Undo
+bined.redo.label=Redo
+bined.cut.label=Cut
+bined.copy.label=Copy
+bined.paste.label=Paste
 
 # window toolbar buttons
 bined.choose-file.icon=Open.png
 bined.save-file.icon=Save.png
 bined.copy-to-buffer.icon=CopyToBuffer.png
+bined.undo.icon=Undo.png
+bined.redo.icon=Redo.png
+bined.cut.icon=Cut.png
+bined.copy.icon=Copy.png
+bined.paste.icon=Paste.png
 
 # Menu items
 plugin.BinEdPlugin.menu=bined.edit-panel

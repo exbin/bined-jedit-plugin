@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-
+import org.exbin.framework.preferences.PreferencesWrapper;
 import org.gjt.sp.jedit.EditPlugin;
 
 /**
  * BinEd plugin class.
  *
- * @version 0.2.0 2020/05/31
+ * @version 0.2.0 2020/06/01
  * @author ExBin Project (http://exbin.org)
  */
 public class BinEdPlugin extends EditPlugin {
 
     public static final String NAME = "bined";
-    public static final String OPTION_PREFIX = "options.bined.";
+    public static final String OPTION_PREFIX = PreferencesWrapper.OPTION_PREFIX;
 
     public BinEdPlugin() {
     }

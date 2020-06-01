@@ -56,7 +56,7 @@ import org.exbin.bined.RowWrappingMode;
 /**
  * Binary editor search panel.
  *
- * @version 0.2.1 2019/07/21
+ * @version 0.2.0 2019/07/21
  * @author ExBin Project (http://exbin.org)
  */
 public class BinarySearchPanel extends javax.swing.JPanel {

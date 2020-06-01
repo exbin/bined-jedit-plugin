@@ -35,7 +35,7 @@ import org.exbin.framework.gui.utils.gui.DefaultControlPanel;
 /**
  * Go to handler.
  *
- * @version 0.2.1 2019/07/21
+ * @version 0.2.0 2020/06/01
  * @author ExBin Project (http://exbin.org)
  */
 @ParametersAreNonnullByDefault

@@ -124,7 +124,7 @@ public class BinEdComponentPanel extends javax.swing.JPanel {
     public BinEdComponentPanel() {
         initComponents();
 
-        preferences = new BinaryEditorPreferences(new PreferencesWrapper(null));
+        preferences = new BinaryEditorPreferences(new PreferencesWrapper());
 
         codeArea = new ExtCodeArea();
         codeArea.setPainter(new ExtendedHighlightNonAsciiCodeAreaPainter(codeArea));

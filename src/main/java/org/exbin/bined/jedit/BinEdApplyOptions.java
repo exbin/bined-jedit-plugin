@@ -29,7 +29,7 @@ import org.exbin.framework.editor.text.options.TextFontOptions;
 /**
  * Options for apply operation.
  *
- * @version 0.2.1 2019/08/21
+ * @version 0.2.0 2020/06/01
  * @author ExBin Project (http://exbin.org)
  */
 @ParametersAreNonnullByDefault

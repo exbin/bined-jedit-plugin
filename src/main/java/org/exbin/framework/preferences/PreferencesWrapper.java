@@ -16,118 +16,115 @@
 package org.exbin.framework.preferences;
 
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.exbin.framework.api.Preferences;
-import java.util.prefs.BackingStoreException;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import org.gjt.sp.jedit.jEdit;
 
 /**
  * Wrapper for preferences.
  *
- * @version 0.2.0 2019/06/09
+ * @version 0.2.0 2020/06/01
  * @author ExBin Project (http://exbin.org)
  */
 @ParametersAreNonnullByDefault
 public class PreferencesWrapper implements Preferences {
 
-    private final java.util.prefs.Preferences preferences;
+    public static final String OPTION_PREFIX = "options.bined.";
 
-    public PreferencesWrapper(java.util.prefs.Preferences preferences) {
-        this.preferences = preferences;
+    public PreferencesWrapper() {
     }
 
     @Override
     public boolean exists(String key) {
-        return preferences.get(key, null) != null;
+        return jEdit.getProperty(OPTION_PREFIX + key, (String) null) != null;
     }
 
     @Nonnull
     @Override
     public Optional<String> get(String key) {
-        return Optional.ofNullable(preferences.get(key, null));
+        return Optional.ofNullable(jEdit.getProperty(OPTION_PREFIX + key, (String) null));
     }
 
     @Nonnull
     @Override
     public String get(String key, String def) {
-        return preferences.get(key, def);
+        return jEdit.getProperty(OPTION_PREFIX + key, def);
     }
 
     @Override
     public void put(String key, @Nullable String value) {
         if (value == null) {
-            preferences.remove(key);
+            jEdit.unsetProperty(OPTION_PREFIX + key);
         } else {
-            preferences.put(key, value);
+            jEdit.setProperty(OPTION_PREFIX + key, value);
         }
     }
 
     @Override
     public void remove(String key) {
-        preferences.remove(key);
+        jEdit.unsetProperty(OPTION_PREFIX + key);
     }
 
     @Override
     public void putInt(String key, int value) {
-        preferences.putInt(key, value);
+        jEdit.setProperty(OPTION_PREFIX + key, Integer.toString(value));
     }
 
     @Override
     public int getInt(String key, int def) {
-        return preferences.getInt(key, def);
+        return Integer.valueOf(jEdit.getProperty(OPTION_PREFIX + key, Integer.toString(def)));
     }
 
     @Override
     public void putLong(String key, long value) {
-        preferences.putLong(key, value);
+        jEdit.setProperty(OPTION_PREFIX + key, Long.toString(value));
     }
 
     @Override
     public long getLong(String key, long def) {
-        return preferences.getLong(key, def);
+        return Long.valueOf(jEdit.getProperty(OPTION_PREFIX + key, Long.toString(def)));
     }
 
     @Override
     public void putBoolean(String key, boolean value) {
-        preferences.putBoolean(key, value);
+        jEdit.setProperty(OPTION_PREFIX + key, Boolean.toString(value));
     }
 
     @Override
     public boolean getBoolean(String key, boolean def) {
-        return preferences.getBoolean(key, def);
+        return Boolean.valueOf(jEdit.getProperty(OPTION_PREFIX + key, Boolean.toString(def)));
     }
 
     @Override
     public void putFloat(String key, float value) {
-        preferences.putFloat(key, value);
+        jEdit.setProperty(OPTION_PREFIX + key, Float.toString(value));
     }
 
     @Override
     public float getFloat(String key, float def) {
-        return preferences.getFloat(key, def);
+        return Float.valueOf(jEdit.getProperty(OPTION_PREFIX + key, Float.toString(def)));
     }
 
     @Override
     public void putDouble(String key, double value) {
-        preferences.putDouble(key, value);
+        jEdit.setProperty(OPTION_PREFIX + key, Double.toString(value));
     }
 
     @Override
     public double getDouble(String key, double def) {
-        return preferences.getDouble(key, def);
+        return Double.valueOf(jEdit.getProperty(OPTION_PREFIX + key, Double.toString(def)));
     }
 
     @Override
     public void putByteArray(String key, byte[] value) {
-        preferences.putByteArray(key, value);
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public byte[] getByteArray(String key, byte[] def) {
-        return preferences.getByteArray(key, def);
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**
@@ -135,11 +132,6 @@ public class PreferencesWrapper implements Preferences {
      */
     @Override
     public void flush() {
-        try {
-            preferences.flush();
-        } catch (BackingStoreException ex) {
-            Logger.getLogger(PreferencesWrapper.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
     /**
@@ -147,15 +139,5 @@ public class PreferencesWrapper implements Preferences {
      */
     @Override
     public void sync() {
-        try {
-            preferences.sync();
-        } catch (BackingStoreException ex) {
-            Logger.getLogger(PreferencesWrapper.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    @Nonnull
-    public java.util.prefs.Preferences getInnerPreferences() {
-        return preferences;
     }
 }

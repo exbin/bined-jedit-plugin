@@ -18,62 +18,46 @@ package org.exbin.bined.jedit;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.io.File;
+import javax.annotation.Nullable;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
-import org.exbin.auxiliary.paged_data.ByteArrayEditableData;
-import org.exbin.auxiliary.paged_data.EditableBinaryData;
-import org.exbin.bined.swing.extended.ExtCodeArea;
 import org.gjt.sp.jedit.EBComponent;
 import org.gjt.sp.jedit.EBMessage;
 import org.gjt.sp.jedit.GUIUtilities;
 import org.gjt.sp.jedit.View;
 import org.gjt.sp.jedit.gui.DefaultFocusComponent;
 import org.gjt.sp.jedit.gui.DockableWindowManager;
-import org.gjt.sp.jedit.jEdit;
 
 /**
- * Anchor class for BinEd edit panel.
+ * BinEd edit panel class.
  *
  * @version 0.2.0 2020/06/01
  * @author ExBin Project (http://exbin.org)
  */
 public class BinEdEditPanel extends JPanel implements EBComponent, BinEdActions, DefaultFocusComponent {
 
+    @Nullable
     private String fileName;
-    private String defaultFilename;
     private View view;
     private boolean floating;
 
     private BinEdToolPanel toolPanel;
-    private ExtCodeArea codeArea;
+    private final BinEdFile editorFile;
 
     public BinEdEditPanel(View view, String position) {
         this.view = view;
-        setLayout(new BorderLayout());
-        this.floating = position.equals(
-                DockableWindowManager.FLOATING);
-
-        this.fileName = jEdit.getProperty(
-                "bined."
-                + "filepath");
-        if (this.fileName == null || this.fileName.length() == 0) {
-            this.fileName = new String(jEdit.getSettingsDirectory()
-                    + File.separator + "qn.txt");
-            jEdit.setProperty("bined."
-                    + "filepath", this.fileName);
-        }
-        this.defaultFilename = new String(this.fileName);
+        super.setLayout(new BorderLayout());
+        this.floating = position.equals(DockableWindowManager.FLOATING);
 
         this.toolPanel = new BinEdToolPanel(this);
         super.add(BorderLayout.NORTH, this.toolPanel);
 
         if (floating) {
-            this.setPreferredSize(new Dimension(500, 250));
+            super.setPreferredSize(new Dimension(500, 250));
         }
 
-        codeArea = new ExtCodeArea();
-        codeArea.setContentData(new ByteArrayEditableData(new byte[]{0x20, 0x21, 0x22}));
-        super.add(BorderLayout.CENTER, codeArea);
+        editorFile = new BinEdFile();
+        super.add(BorderLayout.CENTER, editorFile.getPanel());
     }
 
     @Override
@@ -83,19 +67,19 @@ public class BinEdEditPanel extends JPanel implements EBComponent, BinEdActions,
 
     @Override
     public void chooseFile() {
-        String[] paths = GUIUtilities.showVFSFileDialog(view, null,
-                JFileChooser.OPEN_DIALOG, false);
+        String[] paths = GUIUtilities.showVFSFileDialog(view, null, JFileChooser.OPEN_DIALOG, false);
+
         if (paths != null && !paths[0].equals(fileName)) {
-            saveFile();
+            editorFile.releaseFile();
             fileName = paths[0];
             toolPanel.propertiesChanged();
-            readFile();
+            editorFile.openFile(new File(fileName));
         }
     }
 
     @Override
     public void saveFile() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        editorFile.saveFile();
     }
 
     @Override
@@ -105,14 +89,30 @@ public class BinEdEditPanel extends JPanel implements EBComponent, BinEdActions,
 
     @Override
     public void focusOnDefaultComponent() {
-        // TODO
+        editorFile.requestFocus();
     }
 
-    String getFileName() {
+    public String getFileName() {
         return fileName;
     }
 
-    private void readFile() {
+    public void performUndo() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void performRedo() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    void performCut() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    void performCopy() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    void performPaste() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

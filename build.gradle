@@ -69,7 +69,7 @@ task javadocJar (type: Jar, dependsOn: javadoc) {
 }
 
 if (!hasProperty('mainClass')) {
-    ext.mainClass = 'org.exbin.bined.jedit.BinEdPlugin'
+    ext.mainClass = 'org.exbin.bined.jedit.NoMainClass'
 }
 
 repositories {
@@ -104,4 +104,22 @@ jar {
 
     from configurations.compile.findAll { it.name != 'jedit.jar' }.collect { it.isDirectory() ? it : zipTree(it) }
     destinationDir = file("$buildDir")
+}
+
+distZip.dependsOn jar
+distTar.dependsOn jar
+
+distributions {
+    main {
+        contents {
+            from 'src/dist'
+            include 'readme.txt'
+
+            into('') {
+                from project.jar.archivePath
+                include '*'
+                rename { filename -> "BinEd.jar" }
+            }
+        }
+    }
 }

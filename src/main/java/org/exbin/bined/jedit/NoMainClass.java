@@ -13,23 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.exbin.bined.jedit.gui;
+package org.exbin.bined.jedit;
 
-import org.exbin.framework.bined.FileHandlingMode;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 /**
- * Binary editor component file API.
+ * Class for warning about plugin use only.
  *
+ * @version 0.2.0 2020/06/01
  * @author ExBin Project (http://exbin.org)
- * @version 0.2.0 2020/01/24
  */
-public interface BinEdComponentFileApi {
-
-    boolean isSaveSupported();
-
-    void saveDocument();
-
-    void switchFileHandlingMode(FileHandlingMode newHandlingMode);
-
-    void closeData();
+public class NoMainClass {
+    
+    public static void main(String[] args) {
+        String message = "This is plugin for jedit and cannot be executed as a standalone application. See. plugins.jedit.org";
+        System.err.println(message);
+        JOptionPane.showMessageDialog(new JFrame(), message, "Error", JOptionPane.ERROR_MESSAGE);
+        System.exit(1);
+    }
 }

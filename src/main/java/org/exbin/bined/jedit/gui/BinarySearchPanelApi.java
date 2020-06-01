@@ -22,7 +22,7 @@ import org.exbin.framework.bined.SearchParameters;
 /**
  * Binary search panel interface.
  *
- * @version 0.2.1 2019/07/21
+ * @version 0.2.0 2019/07/21
  * @author ExBin Project (http://exbin.org)
  */
 @ParametersAreNonnullByDefault
