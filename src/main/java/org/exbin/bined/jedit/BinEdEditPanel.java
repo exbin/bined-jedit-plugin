@@ -21,6 +21,7 @@ import java.io.File;
 import javax.annotation.Nullable;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
+import org.exbin.bined.jedit.gui.BinEdComponentPanel;
 import org.gjt.sp.jedit.EBComponent;
 import org.gjt.sp.jedit.EBMessage;
 import org.gjt.sp.jedit.GUIUtilities;
@@ -49,6 +50,8 @@ public class BinEdEditPanel extends JPanel implements EBComponent, BinEdActions,
         super.setLayout(new BorderLayout());
         this.floating = position.equals(DockableWindowManager.FLOATING);
 
+        editorFile = new BinEdFile();
+
         this.toolPanel = new BinEdToolPanel(this);
         super.add(BorderLayout.NORTH, this.toolPanel);
 
@@ -56,7 +59,6 @@ public class BinEdEditPanel extends JPanel implements EBComponent, BinEdActions,
             super.setPreferredSize(new Dimension(500, 250));
         }
 
-        editorFile = new BinEdFile();
         super.add(BorderLayout.CENTER, editorFile.getPanel());
     }
 
@@ -96,23 +98,7 @@ public class BinEdEditPanel extends JPanel implements EBComponent, BinEdActions,
         return fileName;
     }
 
-    public void performUndo() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void performRedo() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    void performCut() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    void performCopy() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    void performPaste() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public BinEdComponentPanel getComponentPanel() {
+        return (BinEdComponentPanel) editorFile.getPanel();
     }
 }

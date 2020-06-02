@@ -17,12 +17,16 @@ package org.exbin.bined.jedit;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractButton;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
+import org.exbin.bined.jedit.gui.BinEdComponentPanel;
+import org.exbin.bined.operation.BinaryDataOperationException;
 import org.gjt.sp.jedit.GUIUtilities;
 import org.gjt.sp.jedit.gui.RolloverButton;
 import org.gjt.sp.jedit.jEdit;
@@ -36,15 +40,17 @@ import org.gjt.sp.jedit.jEdit;
 public class BinEdToolPanel extends JPanel {
 
     private final BinEdEditPanel editPanel;
+    private final BinEdComponentPanel componentPanel;
     private JLabel label;
 
     public BinEdToolPanel(BinEdEditPanel editPanel) {
         this.editPanel = editPanel;
+        componentPanel = editPanel.getComponentPanel();
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
         initComponents();
     }
-    
+
     private void initComponents() {
         Box labelBox = new Box(BoxLayout.Y_AXIS);
         labelBox.add(Box.createGlue());
@@ -68,29 +74,37 @@ public class BinEdToolPanel extends JPanel {
         add(makeCustomButton("bined.copy-to-buffer", (ActionEvent evt) -> {
             editPanel.copyToBuffer();
         }));
-        
+
         add(new JToolBar.Separator());
 
         add(makeCustomButton("bined.undo", (ActionEvent evt) -> {
-            editPanel.performUndo();
+            try {
+                componentPanel.getUndoHandler().performUndo();
+            } catch (BinaryDataOperationException ex) {
+                Logger.getLogger(BinEdToolPanel.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }));
 
         add(makeCustomButton("bined.redo", (ActionEvent evt) -> {
-            editPanel.performRedo();
+            try {
+                componentPanel.getUndoHandler().performRedo();
+            } catch (BinaryDataOperationException ex) {
+                Logger.getLogger(BinEdToolPanel.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }));
 
         add(new JToolBar.Separator());
 
         add(makeCustomButton("bined.cut", (ActionEvent evt) -> {
-            editPanel.performCut();
+            componentPanel.getCodeArea().cut();
         }));
 
         add(makeCustomButton("bined.copy", (ActionEvent evt) -> {
-            editPanel.performCopy();
+            componentPanel.getCodeArea().copy();
         }));
 
         add(makeCustomButton("bined.paste", (ActionEvent evt) -> {
-            editPanel.performPaste();
+            componentPanel.getCodeArea().paste();
         }));
     }
 
