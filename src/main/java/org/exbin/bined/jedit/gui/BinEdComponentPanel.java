@@ -168,7 +168,7 @@ public class BinEdComponentPanel extends javax.swing.JPanel {
     }
 
     private void init() {
-        this.add(toolbarPanel, BorderLayout.NORTH);
+//        this.add(toolbarPanel, BorderLayout.NORTH);
         registerEncodingStatus(statusPanel);
         encodingsHandler = new EncodingsHandler();
         encodingsHandler.setParentComponent(this);
@@ -219,7 +219,7 @@ public class BinEdComponentPanel extends javax.swing.JPanel {
         codeArea.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent keyEvent) {
-                if (keyEvent.getModifiers() == ActionUtils.getMetaMask()) {
+                if (keyEvent.getModifiersEx() == ActionUtils.getMetaMask()) {
                     int keyCode = keyEvent.getKeyCode();
                     switch (keyCode) {
                         case KeyEvent.VK_F: {
@@ -612,7 +612,7 @@ public class BinEdComponentPanel extends javax.swing.JPanel {
     }
 
     @Nonnull
-    private AbstractAction createOptionsAction() {
+    public AbstractAction createOptionsAction() {
         return new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {

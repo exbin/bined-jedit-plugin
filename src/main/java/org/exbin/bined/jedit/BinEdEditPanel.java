@@ -18,7 +18,9 @@ package org.exbin.bined.jedit;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.io.File;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import org.exbin.bined.jedit.gui.BinEdComponentPanel;
@@ -35,6 +37,7 @@ import org.gjt.sp.jedit.gui.DockableWindowManager;
  * @version 0.2.0 2020/06/01
  * @author ExBin Project (http://exbin.org)
  */
+@ParametersAreNonnullByDefault
 public class BinEdEditPanel extends JPanel implements EBComponent, BinEdActions, DefaultFocusComponent {
 
     @Nullable
@@ -94,10 +97,12 @@ public class BinEdEditPanel extends JPanel implements EBComponent, BinEdActions,
         editorFile.requestFocus();
     }
 
+    @Nonnull
     public String getFileName() {
         return fileName;
     }
 
+    @Nonnull
     public BinEdComponentPanel getComponentPanel() {
         return (BinEdComponentPanel) editorFile.getPanel();
     }

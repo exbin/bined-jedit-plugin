@@ -21,6 +21,7 @@ bined.redo.label=Redo
 bined.cut.label=Cut
 bined.copy.label=Copy
 bined.paste.label=Paste
+bined.options.label=Options
 
 # window toolbar buttons
 bined.choose-file.icon=Open.png
@@ -31,6 +32,7 @@ bined.redo.icon=Redo.png
 bined.cut.icon=Cut.png
 bined.copy.icon=Copy.png
 bined.paste.icon=Paste.png
+bined.options.icon=/org/exbin/framework/gui/options/resources/icons/Preferences16.gif
 
 # Menu items
 plugin.BinEdPlugin.menu=bined.edit-panel

@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
@@ -100,10 +101,12 @@ public class BinEdFile implements BinEdComponentFileApi {
         return componentPanel.releaseFile();
     }
 
+    @Nonnull
     public JPanel getPanel() {
         return componentPanel;
     }
 
+    @Nonnull
     public static synchronized SegmentsRepository getSegmentsRepository() {
         if (segmentsRepository == null) {
             segmentsRepository = new SegmentsRepository();
@@ -121,7 +124,7 @@ public class BinEdFile implements BinEdComponentFileApi {
             try {
                 openDocument(file, editable);
             } catch (IOException ex) {
-                ex.printStackTrace();
+                Logger.getLogger(BinEdFile.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
             closeData();

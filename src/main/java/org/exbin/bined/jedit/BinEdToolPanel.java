@@ -19,14 +19,26 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
+import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
+import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JToolBar;
+import org.exbin.bined.CodeType;
 import org.exbin.bined.jedit.gui.BinEdComponentPanel;
 import org.exbin.bined.operation.BinaryDataOperationException;
+import org.exbin.bined.swing.extended.ExtCodeArea;
+import org.exbin.framework.gui.menu.component.DropDownButton;
 import org.gjt.sp.jedit.GUIUtilities;
 import org.gjt.sp.jedit.gui.RolloverButton;
 import org.gjt.sp.jedit.jEdit;
@@ -34,19 +46,105 @@ import org.gjt.sp.jedit.jEdit;
 /**
  * BinEd plugin tool panel.
  *
- * @version 0.2.0 2020/06/01
+ * @version 0.2.0 2020/06/06
  * @author ExBin Project (http://exbin.org)
  */
+@ParametersAreNonnullByDefault
 public class BinEdToolPanel extends JPanel {
 
     private final BinEdEditPanel editPanel;
     private final BinEdComponentPanel componentPanel;
     private JLabel label;
 
+    private javax.swing.JToggleButton showUnprintablesToggleButton;
+
+    private final AbstractAction optionsAction;
+
+    private final AbstractAction cycleCodeTypesAction;
+    private final JRadioButtonMenuItem binaryCodeTypeAction;
+    private final JRadioButtonMenuItem octalCodeTypeAction;
+    private final JRadioButtonMenuItem decimalCodeTypeAction;
+    private final JRadioButtonMenuItem hexadecimalCodeTypeAction;
+    private final ButtonGroup codeTypeButtonGroup;
+    private DropDownButton codeTypeDropDown;
+
     public BinEdToolPanel(BinEdEditPanel editPanel) {
         this.editPanel = editPanel;
         componentPanel = editPanel.getComponentPanel();
-        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        super.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+
+        codeTypeButtonGroup = new ButtonGroup();
+        binaryCodeTypeAction = new JRadioButtonMenuItem(new AbstractAction("Binary") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ExtCodeArea codeArea = componentPanel.getCodeArea();
+                codeArea.setCodeType(CodeType.BINARY);
+                updateCycleButtonState();
+            }
+        });
+        codeTypeButtonGroup.add(binaryCodeTypeAction);
+        octalCodeTypeAction = new JRadioButtonMenuItem(new AbstractAction("Octal") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ExtCodeArea codeArea = componentPanel.getCodeArea();
+                codeArea.setCodeType(CodeType.OCTAL);
+                updateCycleButtonState();
+            }
+        });
+        codeTypeButtonGroup.add(octalCodeTypeAction);
+        decimalCodeTypeAction = new JRadioButtonMenuItem(new AbstractAction("Decimal") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ExtCodeArea codeArea = componentPanel.getCodeArea();
+                codeArea.setCodeType(CodeType.DECIMAL);
+                updateCycleButtonState();
+            }
+        });
+        codeTypeButtonGroup.add(decimalCodeTypeAction);
+        hexadecimalCodeTypeAction = new JRadioButtonMenuItem(new AbstractAction("Hexadecimal") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ExtCodeArea codeArea = componentPanel.getCodeArea();
+                codeArea.setCodeType(CodeType.HEXADECIMAL);
+                updateCycleButtonState();
+            }
+        });
+        codeTypeButtonGroup.add(hexadecimalCodeTypeAction);
+        cycleCodeTypesAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ExtCodeArea codeArea = componentPanel.getCodeArea();
+                int codeTypePos = codeArea.getCodeType().ordinal();
+                CodeType[] values = CodeType.values();
+                CodeType next = codeTypePos + 1 >= values.length ? values[0] : values[codeTypePos + 1];
+                codeArea.setCodeType(next);
+                updateCycleButtonState();
+            }
+        };
+
+        cycleCodeTypesAction.putValue(Action.SHORT_DESCRIPTION, "Cycle thru code types");
+        JPopupMenu cycleCodeTypesPopupMenu = new JPopupMenu();
+        cycleCodeTypesPopupMenu.add(binaryCodeTypeAction);
+        cycleCodeTypesPopupMenu.add(octalCodeTypeAction);
+        cycleCodeTypesPopupMenu.add(decimalCodeTypeAction);
+        cycleCodeTypesPopupMenu.add(hexadecimalCodeTypeAction);
+        codeTypeDropDown = new DropDownButton(cycleCodeTypesAction, cycleCodeTypesPopupMenu);
+        updateCycleButtonState();
+//        codeTypeButton = new JSplitButton("HEX");
+//        codeTypeButton.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                throw new UnsupportedOperationException("Not supported yet.");
+//            }
+//        });
+//        controlToolBar.add(codeTypeButton);
+
+        optionsAction = componentPanel.createOptionsAction();
+
+        showUnprintablesToggleButton = new javax.swing.JToggleButton();
+
+        showUnprintablesToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/exbin/bined/jedit/resources/icons/insert-pilcrow.png"))); // NOI18N
+        showUnprintablesToggleButton.addActionListener((java.awt.event.ActionEvent evt) -> { showUnprintablesToggleButtonActionPerformed(evt); });
 
         initComponents();
     }
@@ -106,6 +204,46 @@ public class BinEdToolPanel extends JPanel {
         add(makeCustomButton("bined.paste", (ActionEvent evt) -> {
             componentPanel.getCodeArea().paste();
         }));
+
+        add(new JToolBar.Separator());
+
+        add(showUnprintablesToggleButton);
+
+        add(codeTypeDropDown);
+
+        add(makeCustomButton("bined.options", optionsAction));
+    }
+
+    private void updateCycleButtonState() {
+        ExtCodeArea codeArea = componentPanel.getCodeArea();
+        CodeType codeType = codeArea.getCodeType();
+        codeTypeDropDown.setActionText(codeType.name().substring(0, 3));
+        switch (codeType) {
+            case BINARY: {
+                if (!binaryCodeTypeAction.isSelected()) {
+                    binaryCodeTypeAction.setSelected(true);
+                }
+                break;
+            }
+            case OCTAL: {
+                if (!octalCodeTypeAction.isSelected()) {
+                    octalCodeTypeAction.setSelected(true);
+                }
+                break;
+            }
+            case DECIMAL: {
+                if (!decimalCodeTypeAction.isSelected()) {
+                    decimalCodeTypeAction.setSelected(true);
+                }
+                break;
+            }
+            case HEXADECIMAL: {
+                if (!hexadecimalCodeTypeAction.isSelected()) {
+                    hexadecimalCodeTypeAction.setSelected(true);
+                }
+                break;
+            }
+        }
     }
 
     void propertiesChanged() {
@@ -113,9 +251,16 @@ public class BinEdToolPanel extends JPanel {
 //        label.setVisible(jEdit.getProperty(OPTION_PREFIX + "show-filepath").equals("true"));
     }
 
+    private void showUnprintablesToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                             
+        ExtCodeArea codeArea = componentPanel.getCodeArea();
+        codeArea.setShowUnprintables(showUnprintablesToggleButton.isSelected());
+    }                                                            
+
+    @Nonnull
     private AbstractButton makeCustomButton(String name, ActionListener listener) {
         String toolTip = jEdit.getProperty(name.concat(".label"));
-        AbstractButton button = new RolloverButton(GUIUtilities.loadIcon(jEdit.getProperty(name + ".icon")));
+        String iconPath = jEdit.getProperty(name + ".icon");
+        AbstractButton button = new RolloverButton(iconPath.startsWith("/") ? new javax.swing.ImageIcon(getClass().getResource(iconPath)) : GUIUtilities.loadIcon(iconPath));
         if (listener != null) {
             button.addActionListener(listener);
             button.setEnabled(true);
@@ -125,5 +270,4 @@ public class BinEdToolPanel extends JPanel {
         button.setToolTipText(toolTip);
         return button;
     }
-
 }

@@ -17,6 +17,8 @@ package org.exbin.bined.jedit;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -46,7 +48,6 @@ public class BinaryUndoSwingHandler implements BinaryDataUndoHandler {
      * Creates a new instance.
      *
      * @param codeArea hexadecimal component
-     * @param undoManager undo manager
      */
     public BinaryUndoSwingHandler(CodeAreaCore codeArea) { // , UndoRedo.Manager undoManager
         this.codeArea = codeArea;
@@ -86,7 +87,7 @@ public class BinaryUndoSwingHandler implements BinaryDataUndoHandler {
                 try {
                     command.undo();
                 } catch (BinaryDataOperationException ex) {
-                    ex.printStackTrace();
+                    Logger.getLogger(BinaryUndoSwingHandler.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 undoUpdated();
             }
@@ -102,7 +103,7 @@ public class BinaryUndoSwingHandler implements BinaryDataUndoHandler {
                 try {
                     command.redo();
                 } catch (BinaryDataOperationException ex) {
-                    ex.printStackTrace();
+                    Logger.getLogger(BinaryUndoSwingHandler.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 undoUpdated();
             }

@@ -74,7 +74,7 @@ public class DropDownButtonPanel extends javax.swing.JPanel {
                 int deltaY = child.getY() + me.getY();
 
                 //dispatch it to the parent component
-                parent.dispatchEvent(new MouseEvent(parent, me.getID(), me.getWhen(), me.getModifiers(), deltaX, deltaY, me.getClickCount(), false));
+                parent.dispatchEvent(new MouseEvent(parent, me.getID(), me.getWhen(), me.getModifiersEx(), deltaX, deltaY, me.getClickCount(), false));
             }
         });
     }

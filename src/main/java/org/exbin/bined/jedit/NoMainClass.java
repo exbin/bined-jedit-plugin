@@ -25,7 +25,10 @@ import javax.swing.JOptionPane;
  * @author ExBin Project (http://exbin.org)
  */
 public class NoMainClass {
-    
+
+    private NoMainClass() {
+    }
+
     public static void main(String[] args) {
         String message = "This is plugin for jedit and cannot be executed as a standalone application. See. plugins.jedit.org";
         System.err.println(message);

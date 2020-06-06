@@ -15,6 +15,7 @@
  */
 package org.exbin.bined.jedit.gui;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import org.exbin.framework.bined.FileHandlingMode;
 
 /**
@@ -23,6 +24,7 @@ import org.exbin.framework.bined.FileHandlingMode;
  * @author ExBin Project (http://exbin.org)
  * @version 0.2.0 2020/01/24
  */
+@ParametersAreNonnullByDefault
 public interface BinEdComponentFileApi {
 
     boolean isSaveSupported();
