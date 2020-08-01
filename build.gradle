@@ -7,7 +7,7 @@ buildscript {
     }
 }
 
-['java', 'distribution', 'maven'].each {
+['java', 'distribution', 'maven-publish'].each {
     apply plugin: it
 }
 import org.gradle.util.VersionNumber
@@ -40,7 +40,7 @@ if (!gradle.startParameter.taskNames.any {it.endsWith("test")}) {
 
 task testJar(type: Jar, dependsOn: testClasses) {
     classifier "tests"
-    baseName = "test-${project.archivesBaseName}"
+    archiveBaseName = "test-${project.archivesBaseName}"
     from sourceSets.test.output
 }
 
@@ -80,19 +80,19 @@ repositories {
 }
 
 dependencies {
-    compile ':jedit'
+    implementation ':jedit'
 
-    compile ":bined-core-${binedVersion}"
-    compile ":bined-extended-${binedVersion}"
-    compile ":bined-highlight-swing-${binedVersion}"
-    compile ":bined-operation-${binedVersion}"
-    compile ":bined-operation-swing-${binedVersion}"
-    compile ":bined-swing-${binedVersion}"
-    compile ":bined-swing-extended-${binedVersion}"
-    compile ":paged_data-0.2.0-20200423.194250-5"
-    compile ":paged_data-delta-0.2.0-20200124.190959-4"
-    compile ':jsr305-3.0.2'
-    testCompile group : 'junit', name: 'junit', version: '4.10'
+    implementation ":bined-core-${binedVersion}"
+    implementation ":bined-extended-${binedVersion}"
+    implementation ":bined-highlight-swing-${binedVersion}"
+    implementation ":bined-operation-${binedVersion}"
+    implementation ":bined-operation-swing-${binedVersion}"
+    implementation ":bined-swing-${binedVersion}"
+    implementation ":bined-swing-extended-${binedVersion}"
+    implementation ":paged_data-0.2.0-20200423.194250-5"
+    implementation ":paged_data-delta-0.2.0-20200124.190959-4"
+    implementation ':jsr305-3.0.2'
+    testImplementation group : 'junit', name: 'junit', version: '4.10'
 }
 
 jar {
@@ -102,8 +102,8 @@ jar {
         )
     }
 
-    from configurations.compile.findAll { it.name != 'jedit.jar' }.collect { it.isDirectory() ? it : zipTree(it) }
-    destinationDir = file("$buildDir")
+    from configurations.compileClasspath.findAll { it.name != 'jedit.jar' }.collect { it.isDirectory() ? it : zipTree(it) }
+    destinationDirectory = file("$buildDir")
 }
 
 distZip.dependsOn jar
