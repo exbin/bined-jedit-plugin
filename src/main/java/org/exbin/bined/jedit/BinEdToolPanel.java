@@ -27,8 +27,6 @@ import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -38,7 +36,7 @@ import org.exbin.bined.CodeType;
 import org.exbin.bined.jedit.gui.BinEdComponentPanel;
 import org.exbin.bined.operation.BinaryDataOperationException;
 import org.exbin.bined.swing.extended.ExtCodeArea;
-import org.exbin.framework.gui.menu.component.DropDownButton;
+import org.exbin.framework.gui.action.gui.DropDownButton;
 import org.gjt.sp.jedit.GUIUtilities;
 import org.gjt.sp.jedit.gui.RolloverButton;
 import org.gjt.sp.jedit.jEdit;
@@ -46,7 +44,7 @@ import org.gjt.sp.jedit.jEdit;
 /**
  * BinEd plugin tool panel.
  *
- * @version 0.2.0 2020/06/06
+ * @version 0.2.0 2021/09/02
  * @author ExBin Project (http://exbin.org)
  */
 @ParametersAreNonnullByDefault
@@ -56,7 +54,8 @@ public class BinEdToolPanel extends JPanel {
     private final BinEdComponentPanel componentPanel;
     private JLabel label;
 
-    private javax.swing.JToggleButton showUnprintablesToggleButton;
+    private final AbstractAction showUnprintablesAction;
+    private AbstractButton showUnprintablesButton;
 
     private final AbstractAction optionsAction;
 
@@ -130,21 +129,15 @@ public class BinEdToolPanel extends JPanel {
         cycleCodeTypesPopupMenu.add(hexadecimalCodeTypeAction);
         codeTypeDropDown = new DropDownButton(cycleCodeTypesAction, cycleCodeTypesPopupMenu);
         updateCycleButtonState();
-//        codeTypeButton = new JSplitButton("HEX");
-//        codeTypeButton.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                throw new UnsupportedOperationException("Not supported yet.");
-//            }
-//        });
-//        controlToolBar.add(codeTypeButton);
 
         optionsAction = componentPanel.createOptionsAction();
 
-        showUnprintablesToggleButton = new javax.swing.JToggleButton();
-
-        showUnprintablesToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/exbin/bined/jedit/resources/icons/insert-pilcrow.png"))); // NOI18N
-        showUnprintablesToggleButton.addActionListener((java.awt.event.ActionEvent evt) -> { showUnprintablesToggleButtonActionPerformed(evt); });
+        showUnprintablesAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showUnprintablesToggleButtonActionPerformed(e);
+            }
+        };
 
         initComponents();
     }
@@ -207,7 +200,10 @@ public class BinEdToolPanel extends JPanel {
 
         add(new JToolBar.Separator());
 
-        add(showUnprintablesToggleButton);
+        showUnprintablesButton = makeCustomButton("bined.show-unprintables", showUnprintablesAction);
+        showUnprintablesButton.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource(jEdit.getProperty("bined.show-unprintables.selectedIcon"))));
+        showUnprintablesButton.setSelected(true);
+        add(showUnprintablesButton);
 
         add(codeTypeDropDown);
 
@@ -253,7 +249,9 @@ public class BinEdToolPanel extends JPanel {
 
     private void showUnprintablesToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                             
         ExtCodeArea codeArea = componentPanel.getCodeArea();
-        codeArea.setShowUnprintables(showUnprintablesToggleButton.isSelected());
+        boolean selected = showUnprintablesButton.isSelected();
+        showUnprintablesButton.setSelected(!selected);
+        codeArea.setShowUnprintables(!selected);
     }                                                            
 
     @Nonnull

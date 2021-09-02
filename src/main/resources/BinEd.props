@@ -4,8 +4,8 @@ plugin.BinEdPlugin.version=0.2.0
 plugin.BinEdPlugin.docs=docs/index.html
 plugin.BinEdPlugin.description=Binary/hexadecimal editor based on BinEd library.
 plugin.BinEdPlugin.longdescription=description.html
-plugin.BinEdPlugin.depend.0=jedit 04.02.01.00
-plugin.BinEdPlugin.depend.1=jdk 1.4
+plugin.BinEdPlugin.depend.0=jedit 04.05.00.00
+plugin.BinEdPlugin.depend.1=jdk 1.8
 plugin.BinEdPlugin.activate=defer
 
 bined.title=BinEd Binary/Hexadecimal Editor
@@ -22,6 +22,7 @@ bined.cut.label=Cut
 bined.copy.label=Copy
 bined.paste.label=Paste
 bined.options.label=Options
+bined.show-unprintables.label=Show unprintables
 
 # window toolbar buttons
 bined.choose-file.icon=Open.png
@@ -33,6 +34,8 @@ bined.cut.icon=Cut.png
 bined.copy.icon=Copy.png
 bined.paste.icon=Paste.png
 bined.options.icon=/org/exbin/framework/gui/options/resources/icons/Preferences16.gif
+bined.show-unprintables.icon=/org/exbin/bined/jedit/resources/icons/insert-pilcrow_disabled.png
+bined.show-unprintables.selectedIcon=/org/exbin/bined/jedit/resources/icons/insert-pilcrow.png
 
 # Menu items
 plugin.BinEdPlugin.menu=bined.edit-panel

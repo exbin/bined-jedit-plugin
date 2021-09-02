@@ -27,7 +27,7 @@ import javax.swing.JRadioButtonMenuItem;
 import org.exbin.bined.CodeType;
 import org.exbin.bined.swing.extended.ExtCodeArea;
 import org.exbin.framework.bined.preferences.BinaryEditorPreferences;
-import org.exbin.framework.gui.menu.component.DropDownButton;
+import org.exbin.framework.gui.action.gui.DropDownButton;
 import org.exbin.framework.gui.utils.LanguageUtils;
 
 /**
