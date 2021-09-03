@@ -25,7 +25,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import org.exbin.bined.EditMode;
 import org.exbin.bined.SelectionRange;
-import org.exbin.bined.capability.EditModeCapable;
 import org.exbin.bined.RowWrappingMode;
 import org.exbin.bined.capability.RowWrappingCapable;
 import org.exbin.bined.extended.theme.ExtendedBackgroundPaintMode;
@@ -35,6 +34,7 @@ import org.exbin.bined.swing.extended.theme.ExtendedCodeAreaThemeProfile;
 import org.exbin.framework.gui.utils.LanguageUtils;
 import org.exbin.framework.gui.utils.WindowUtils;
 import org.exbin.auxiliary.paged_data.ByteArrayEditableData;
+import org.exbin.bined.capability.EditModeCapable;
 
 /**
  * Theme profile panel.

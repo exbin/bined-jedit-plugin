@@ -21,8 +21,8 @@ import java.util.Collection;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
-import org.exbin.bined.RowWrappingMode;
 import org.exbin.bined.basic.CodeAreaViewMode;
+import org.exbin.bined.RowWrappingMode;
 import org.exbin.bined.swing.extended.layout.DefaultExtendedCodeAreaLayoutProfile;
 import org.exbin.bined.swing.extended.layout.ExtendedCodeAreaDecorations;
 import org.exbin.bined.swing.extended.theme.ExtendedCodeAreaThemeProfile;
@@ -33,14 +33,14 @@ import org.exbin.framework.editor.text.preferences.TextFontPreferences;
 /**
  * Binary editor preferences.
  *
- * @version 0.2.1 2019/09/05
+ * @version 0.2.1 2019/07/21
  * @author ExBin Project (http://exbin.org)
  */
 @ParametersAreNonnullByDefault
 public class BinaryEditorPreferences {
 
     private final static String PREFERENCES_VERSION = "version";
-    private final static String PREFERENCES_VERSION_VALUE = "0.2.2";
+    private final static String PREFERENCES_VERSION_VALUE = "0.2.1";
 
     private final Preferences preferences;
 
@@ -71,23 +71,15 @@ public class BinaryEditorPreferences {
     private void convertOlderPreferences() {
         final String legacyDef = "LEGACY";
         String storedVersion = preferences.get(PREFERENCES_VERSION, legacyDef);
-        if (PREFERENCES_VERSION_VALUE.equals(storedVersion)) {
-            return;
-        }
-
-        if (legacyDef.equals(storedVersion)) {
+        if ("0.2.0".equals(storedVersion)) {
+            convertPreferences_0_2_0();
+        } else if (legacyDef.equals(storedVersion)) {
             try {
                 importLegacyPreferences();
             } finally {
                 preferences.put(PREFERENCES_VERSION, PREFERENCES_VERSION_VALUE);
                 preferences.flush();
             }
-        }
-
-        if ("0.2.0".equals(storedVersion)) {
-            convertPreferences_0_2_0();
-            preferences.put(PREFERENCES_VERSION, PREFERENCES_VERSION_VALUE);
-            preferences.flush();
         }
     }
 

@@ -27,7 +27,7 @@ import org.exbin.bined.SelectionRange;
 /**
  * Binary editor status interface.
  *
- * @version 0.2.1 2020/01/24
+ * @version 0.2.1 2021/08/13
  * @author ExBin Project (http://exbin.org)
  */
 @ParametersAreNonnullByDefault
@@ -41,7 +41,7 @@ public interface BinaryStatusApi {
     void setCursorPosition(CodeAreaCaretPosition cursorPosition);
 
     /**
-     * Reports cursor position.
+     * Sets current selection.
      *
      * @param selectionRange current selection
      */
@@ -81,7 +81,7 @@ public interface BinaryStatusApi {
     public static interface StatusControlHandler {
 
         /**
-         * Requests change of edit mode from given mode.
+         * Requests change of edit operation from given operation.
          *
          * @param operation edit operation
          */
@@ -113,7 +113,7 @@ public interface BinaryStatusApi {
     }
 
     @ParametersAreNonnullByDefault
-    public static enum MemoryMode {
+    public enum MemoryMode {
 
         READ_ONLY("R", "read_only"),
         RAM_MEMORY("M", "ram"),

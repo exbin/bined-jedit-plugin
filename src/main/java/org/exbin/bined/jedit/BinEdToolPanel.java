@@ -34,7 +34,9 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JToolBar;
 import org.exbin.bined.CodeType;
 import org.exbin.bined.jedit.gui.BinEdComponentPanel;
+import org.exbin.bined.operation.BinaryDataCommand;
 import org.exbin.bined.operation.BinaryDataOperationException;
+import org.exbin.bined.operation.undo.BinaryDataUndoUpdateListener;
 import org.exbin.bined.swing.extended.ExtCodeArea;
 import org.exbin.framework.gui.action.gui.DropDownButton;
 import org.gjt.sp.jedit.GUIUtilities;
@@ -44,7 +46,7 @@ import org.gjt.sp.jedit.jEdit;
 /**
  * BinEd plugin tool panel.
  *
- * @version 0.2.0 2021/09/02
+ * @version 0.2.0 2021/09/03
  * @author ExBin Project (http://exbin.org)
  */
 @ParametersAreNonnullByDefault
@@ -66,6 +68,12 @@ public class BinEdToolPanel extends JPanel {
     private final JRadioButtonMenuItem hexadecimalCodeTypeAction;
     private final ButtonGroup codeTypeButtonGroup;
     private DropDownButton codeTypeDropDown;
+
+    private AbstractButton undoButton;
+    private AbstractButton redoButton;
+    private AbstractButton cutButton;
+    private AbstractButton copyButton;
+    private AbstractButton pasteButton;
 
     public BinEdToolPanel(BinEdEditPanel editPanel) {
         this.editPanel = editPanel;
@@ -168,41 +176,66 @@ public class BinEdToolPanel extends JPanel {
 
         add(new JToolBar.Separator());
 
-        add(makeCustomButton("bined.undo", (ActionEvent evt) -> {
+        undoButton = makeCustomButton("bined.undo", (ActionEvent evt) -> {
             try {
                 componentPanel.getUndoHandler().performUndo();
             } catch (BinaryDataOperationException ex) {
                 Logger.getLogger(BinEdToolPanel.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }));
+        });
+        undoButton.setEnabled(false);
+        add(undoButton);
 
-        add(makeCustomButton("bined.redo", (ActionEvent evt) -> {
+        redoButton = makeCustomButton("bined.redo", (ActionEvent evt) -> {
             try {
                 componentPanel.getUndoHandler().performRedo();
             } catch (BinaryDataOperationException ex) {
                 Logger.getLogger(BinEdToolPanel.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }));
+        });
+        redoButton.setEnabled(false);
+        add(redoButton);
+        componentPanel.getUndoHandler().addUndoUpdateListener(new BinaryDataUndoUpdateListener() {
+            @Override
+            public void undoCommandPositionChanged() {
+                undoButton.setEnabled(componentPanel.getUndoHandler().canUndo());
+                redoButton.setEnabled(componentPanel.getUndoHandler().canRedo());
+            }
+
+            @Override
+            public void undoCommandAdded(BinaryDataCommand bdc) {
+                undoButton.setEnabled(componentPanel.getUndoHandler().canUndo());
+                redoButton.setEnabled(componentPanel.getUndoHandler().canRedo());
+            }
+        });
 
         add(new JToolBar.Separator());
 
-        add(makeCustomButton("bined.cut", (ActionEvent evt) -> {
+        cutButton = makeCustomButton("bined.cut", (ActionEvent evt) -> {
             componentPanel.getCodeArea().cut();
-        }));
+        });
+        cutButton.setEnabled(false);
+        add(cutButton);
 
-        add(makeCustomButton("bined.copy", (ActionEvent evt) -> {
+        copyButton = makeCustomButton("bined.copy", (ActionEvent evt) -> {
             componentPanel.getCodeArea().copy();
-        }));
+        });
+        copyButton.setEnabled(false);
+        add(copyButton);
 
-        add(makeCustomButton("bined.paste", (ActionEvent evt) -> {
+        pasteButton = makeCustomButton("bined.paste", (ActionEvent evt) -> {
             componentPanel.getCodeArea().paste();
-        }));
+        });
+        pasteButton.setEnabled(false);
+        add(pasteButton);
 
         add(new JToolBar.Separator());
 
         showUnprintablesButton = makeCustomButton("bined.show-unprintables", showUnprintablesAction);
         showUnprintablesButton.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource(jEdit.getProperty("bined.show-unprintables.selectedIcon"))));
         showUnprintablesButton.setSelected(true);
+        ExtCodeArea codeArea = componentPanel.getCodeArea();
+        codeArea.setShowUnprintables(true);
         add(showUnprintablesButton);
 
         add(codeTypeDropDown);
@@ -247,12 +280,12 @@ public class BinEdToolPanel extends JPanel {
 //        label.setVisible(jEdit.getProperty(OPTION_PREFIX + "show-filepath").equals("true"));
     }
 
-    private void showUnprintablesToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                             
+    private void showUnprintablesToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {
         ExtCodeArea codeArea = componentPanel.getCodeArea();
         boolean selected = showUnprintablesButton.isSelected();
         showUnprintablesButton.setSelected(!selected);
         codeArea.setShowUnprintables(!selected);
-    }                                                            
+    }
 
     @Nonnull
     private AbstractButton makeCustomButton(String name, ActionListener listener) {

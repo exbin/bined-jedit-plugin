@@ -26,7 +26,7 @@ import org.exbin.framework.gui.options.api.OptionsData;
 /**
  * Text encoding options.
  *
- * @version 0.2.1 2019/07/19
+ * @version 0.2.1 2020/08/17
  * @author ExBin Project (http://exbin.org)
  */
 @ParametersAreNonnullByDefault
