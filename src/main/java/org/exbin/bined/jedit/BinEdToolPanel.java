@@ -74,6 +74,7 @@ public class BinEdToolPanel extends JPanel {
     private AbstractButton cutButton;
     private AbstractButton copyButton;
     private AbstractButton pasteButton;
+    private AbstractButton saveButton;
 
     public BinEdToolPanel(BinEdEditPanel editPanel) {
         this.editPanel = editPanel;
@@ -167,12 +168,16 @@ public class BinEdToolPanel extends JPanel {
         add(makeCustomButton("bined.choose-file", (ActionEvent evt) -> {
             editPanel.chooseFile();
         }));
-        add(makeCustomButton("bined.save-file", (ActionEvent evt) -> {
+        saveButton = makeCustomButton("bined.save-file", (ActionEvent evt) -> {
             editPanel.saveFile();
-        }));
-        add(makeCustomButton("bined.copy-to-buffer", (ActionEvent evt) -> {
+        });
+        saveButton.setEnabled(false);
+        add(saveButton);
+        AbstractButton copyToBufferButton = makeCustomButton("bined.copy-to-buffer", (ActionEvent evt) -> {
             editPanel.copyToBuffer();
-        }));
+        });
+        copyToBufferButton.setEnabled(false);
+        add(copyToBufferButton);
 
         add(new JToolBar.Separator());
 
@@ -198,12 +203,14 @@ public class BinEdToolPanel extends JPanel {
         componentPanel.getUndoHandler().addUndoUpdateListener(new BinaryDataUndoUpdateListener() {
             @Override
             public void undoCommandPositionChanged() {
+                saveButton.setEnabled(componentPanel.isModified());
                 undoButton.setEnabled(componentPanel.getUndoHandler().canUndo());
                 redoButton.setEnabled(componentPanel.getUndoHandler().canRedo());
             }
 
             @Override
             public void undoCommandAdded(BinaryDataCommand bdc) {
+                saveButton.setEnabled(componentPanel.isModified());
                 undoButton.setEnabled(componentPanel.getUndoHandler().canUndo());
                 redoButton.setEnabled(componentPanel.getUndoHandler().canRedo());
             }

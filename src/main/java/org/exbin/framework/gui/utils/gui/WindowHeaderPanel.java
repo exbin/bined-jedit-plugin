@@ -1,18 +1,17 @@
 /*
  * Copyright (C) ExBin Project
  *
- * This application or library is free software: you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This application or library is distributed in the hope that it will be
- * useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Lesser General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along this application.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.exbin.framework.gui.utils.gui;
 
@@ -26,6 +25,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.swing.Icon;
+import org.exbin.framework.gui.utils.WindowUtils;
 
 /**
  * Simple header panel.
@@ -46,9 +46,7 @@ public class WindowHeaderPanel extends javax.swing.JPanel {
     public WindowHeaderPanel() {
         initComponents();
         titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD));
-        Color backgroundColor = textPanel.getBackground();
-        int medium = (backgroundColor.getRed() + backgroundColor.getBlue() + backgroundColor.getGreen()) / 3;
-        darkMode = medium < 96;
+        darkMode = WindowUtils.isDarkUI();
         if (darkMode) {
             WindowHeaderPanel.this.setBackground(Color.BLACK);
             titleLabel.setForeground(Color.WHITE);

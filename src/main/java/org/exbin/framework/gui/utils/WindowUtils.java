@@ -1,22 +1,22 @@
 /*
  * Copyright (C) ExBin Project
  *
- * This application or library is free software: you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of the License,
- * or (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This application or library is distributed in the hope that it will be
- * useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Lesser General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along this application.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.exbin.framework.gui.utils;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dialog;
@@ -30,6 +30,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.net.URL;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,6 +53,7 @@ import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.text.JTextComponent;
 import org.exbin.framework.gui.utils.handler.OkCancelService;
@@ -60,7 +62,7 @@ import org.exbin.framework.gui.utils.gui.WindowHeaderPanel;
 /**
  * Utility static methods usable for windows and dialogs.
  *
- * @version 0.2.1 2019/07/14
+ * @version 0.2.1 2019/10/15
  * @author ExBin Project (http://exbin.org)
  */
 @ParametersAreNonnullByDefault
@@ -76,7 +78,7 @@ public class WindowUtils {
     public static WindowHeaderPanel addHeaderPanel(Window window, Class<?> resourceClass, ResourceBundle resourceBundle) {
         URL iconUrl = resourceClass.getResource(resourceBundle.getString("header.icon"));
         Icon headerIcon = iconUrl != null ? new ImageIcon(iconUrl) : null;
-        return  addHeaderPanel(window, resourceBundle.getString("header.title"), resourceBundle.getString("header.description"), headerIcon);
+        return addHeaderPanel(window, resourceBundle.getString("header.title"), resourceBundle.getString("header.description"), headerIcon);
     }
 
     @Nonnull
@@ -208,6 +210,16 @@ public class WindowUtils {
         WindowUtils.lookAndFeel = lookAndFeel;
     }
 
+    public static boolean isDarkUI() {
+        Color backgroundColor = UIManager.getColor("TextArea.background");
+        if (backgroundColor == null) {
+            return false;
+        }
+
+        int medium = (backgroundColor.getRed() + backgroundColor.getBlue() + backgroundColor.getGreen()) / 3;
+        return medium < 96;
+    }
+
     public static void closeWindow(Window window) {
         window.dispatchEvent(new WindowEvent(window, WindowEvent.WINDOW_CLOSING));
     }
@@ -221,7 +233,7 @@ public class WindowUtils {
     }
 
     /**
-     * Find frame component for given component.
+     * Finds frame component for given component.
      *
      * @param component instantiated component
      * @return frame instance if found
@@ -404,9 +416,14 @@ public class WindowUtils {
         if (position.isMaximized()) {
             window.setLocation((int) absoluteX, (int) absoluteY);
             if (window instanceof Frame) {
-                ((Frame) window).setExtendedState(JFrame.MAXIMIZED_BOTH);
+                ((Frame) window).setExtendedState(Frame.MAXIMIZED_BOTH);
             } else {
-                // TODO if (window instanceof JDialog) 
+                if (window instanceof Window) {
+                    // TODO 
+//                    final EventQueue eventQueue = AccessController.doPrivileged(
+//                            (PrivilegedAction<EventQueue>) Toolkit.getDefaultToolkit()::getSystemEventQueue);
+//                    eventQueue.postEvent(new AWTEvent(window, WindowEvent.WINDOW_ICONIFIED) {});
+                }
             }
         } else {
             window.setBounds((int) absoluteX, (int) absoluteY, (int) widthX, (int) widthY);
