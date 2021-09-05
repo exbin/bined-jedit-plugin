@@ -219,6 +219,18 @@ public class BinEdFile implements BinEdComponentFileApi {
         }
     }
 
+    public void newFile() {
+        closeData();
+        ExtCodeArea codeArea = componentPanel.getCodeArea();
+        BinaryData data = codeArea.getContentData();
+        if (data instanceof DeltaDocument) {
+            segmentsRepository.dropDocument(Objects.requireNonNull((DeltaDocument) codeArea.getContentData()));
+        }
+        setNewData();
+        file = null;
+        componentPanel.getUndoHandler().clear();
+    }
+
     @Override
     public void saveDocument() {
         if (file == null) {

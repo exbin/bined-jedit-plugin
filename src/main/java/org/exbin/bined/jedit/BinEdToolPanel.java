@@ -15,6 +15,9 @@
  */
 package org.exbin.bined.jedit;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.FlavorEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.logging.Level;
@@ -38,6 +41,7 @@ import org.exbin.bined.operation.BinaryDataCommand;
 import org.exbin.bined.operation.BinaryDataOperationException;
 import org.exbin.bined.operation.undo.BinaryDataUndoUpdateListener;
 import org.exbin.bined.swing.extended.ExtCodeArea;
+import org.exbin.framework.bined.FileHandlingMode;
 import org.exbin.framework.gui.action.gui.DropDownButton;
 import org.gjt.sp.jedit.GUIUtilities;
 import org.gjt.sp.jedit.gui.RolloverButton;
@@ -234,6 +238,14 @@ public class BinEdToolPanel extends JPanel {
             componentPanel.getCodeArea().paste();
         });
         pasteButton.setEnabled(false);
+        componentPanel.getCodeArea().addSelectionChangedListener(() -> {
+            updateClipboardActionsStatus();
+        });
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        clipboard.addFlavorListener((FlavorEvent e) -> {
+            updateClipboardActionsStatus();
+        });
+        updateClipboardActionsStatus();
         add(pasteButton);
 
         add(new JToolBar.Separator());
@@ -281,7 +293,14 @@ public class BinEdToolPanel extends JPanel {
             }
         }
     }
-
+    
+    private void updateClipboardActionsStatus() {
+        ExtCodeArea codeArea = componentPanel.getCodeArea();
+        cutButton.setEnabled(codeArea.hasSelection());
+        copyButton.setEnabled(codeArea.hasSelection());
+        pasteButton.setEnabled(codeArea.canPaste());
+    }
+    
     void propertiesChanged() {
         label.setText(editPanel.getFileName());
 //        label.setVisible(jEdit.getProperty(OPTION_PREFIX + "show-filepath").equals("true"));

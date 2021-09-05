@@ -63,6 +63,7 @@ public class BinEdEditPanel extends JPanel implements EBComponent, BinEdActions,
         }
 
         super.add(BorderLayout.CENTER, editorFile.getPanel());
+        editorFile.newFile();
     }
 
     @Override
