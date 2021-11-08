@@ -29,7 +29,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
-import javax.swing.JPanel;
 import org.exbin.auxiliary.paged_data.BinaryData;
 import org.exbin.auxiliary.paged_data.ByteArrayData;
 import org.exbin.auxiliary.paged_data.EditableBinaryData;
@@ -102,7 +101,7 @@ public class BinEdFile implements BinEdComponentFileApi {
     }
 
     @Nonnull
-    public JPanel getPanel() {
+    public BinEdComponentPanel getPanel() {
         return componentPanel;
     }
 

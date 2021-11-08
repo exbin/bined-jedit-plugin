@@ -22,6 +22,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import org.exbin.framework.editor.text.TextEncodingStatusApi;
 import org.exbin.framework.editor.text.preferences.TextEncodingPreferences;
 import org.exbin.framework.editor.text.service.*;
+import org.exbin.xbup.core.util.StringUtils;
 
 /**
  * Implementation of the text encoding service.
@@ -33,7 +34,7 @@ import org.exbin.framework.editor.text.service.*;
 public class TextEncodingServiceImpl implements TextEncodingService {
 
     private List<String> encodings = new ArrayList<>();
-    private String selectedEncoding = TextEncodingPreferences.ENCODING_UTF8;
+    private String selectedEncoding = StringUtils.ENCODING_UTF8;
     private TextEncodingStatusApi textEncodingStatus = null;
     private EncodingChangeListener encodingChangeListener = null;
 

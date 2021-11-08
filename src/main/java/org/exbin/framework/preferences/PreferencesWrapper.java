@@ -16,115 +16,118 @@
 package org.exbin.framework.preferences;
 
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.exbin.framework.api.Preferences;
+import java.util.prefs.BackingStoreException;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import org.gjt.sp.jedit.jEdit;
 
 /**
  * Wrapper for preferences.
  *
- * @version 0.2.0 2020/06/01
+ * @version 0.2.0 2019/06/09
  * @author ExBin Project (http://exbin.org)
  */
 @ParametersAreNonnullByDefault
 public class PreferencesWrapper implements Preferences {
 
-    public static final String OPTION_PREFIX = "options.bined.";
+    private final java.util.prefs.Preferences preferences;
 
-    public PreferencesWrapper() {
+    public PreferencesWrapper(java.util.prefs.Preferences preferences) {
+        this.preferences = preferences;
     }
 
     @Override
     public boolean exists(String key) {
-        return jEdit.getProperty(OPTION_PREFIX + key, (String) null) != null;
+        return preferences.get(key, null) != null;
     }
 
     @Nonnull
     @Override
     public Optional<String> get(String key) {
-        return Optional.ofNullable(jEdit.getProperty(OPTION_PREFIX + key, (String) null));
+        return Optional.ofNullable(preferences.get(key, null));
     }
 
     @Nonnull
     @Override
     public String get(String key, String def) {
-        return jEdit.getProperty(OPTION_PREFIX + key, def);
+        return preferences.get(key, def);
+    }
+
+    @Override
+    public void remove(String key) {
+        preferences.remove(key);
+    }
+
+    @Override
+    public void putInt(String key, int value) {
+        preferences.putInt(key, value);
+    }
+
+    @Override
+    public int getInt(String key, int def) {
+        return preferences.getInt(key, def);
+    }
+
+    @Override
+    public void putLong(String key, long value) {
+        preferences.putLong(key, value);
+    }
+
+    @Override
+    public long getLong(String key, long def) {
+        return preferences.getLong(key, def);
+    }
+
+    @Override
+    public void putBoolean(String key, boolean value) {
+        preferences.putBoolean(key, value);
+    }
+
+    @Override
+    public boolean getBoolean(String key, boolean def) {
+        return preferences.getBoolean(key, def);
+    }
+
+    @Override
+    public void putFloat(String key, float value) {
+        preferences.putFloat(key, value);
+    }
+
+    @Override
+    public float getFloat(String key, float def) {
+        return preferences.getFloat(key, def);
+    }
+
+    @Override
+    public void putDouble(String key, double value) {
+        preferences.putDouble(key, value);
+    }
+
+    @Override
+    public double getDouble(String key, double def) {
+        return preferences.getDouble(key, def);
+    }
+
+    @Override
+    public void putByteArray(String key, byte[] value) {
+        preferences.putByteArray(key, value);
+    }
+
+    @Override
+    public byte[] getByteArray(String key, byte[] def) {
+        return preferences.getByteArray(key, def);
     }
 
     @Override
     public void put(String key, @Nullable String value) {
         if (value == null) {
-            jEdit.unsetProperty(OPTION_PREFIX + key);
+            preferences.remove(key);
         } else {
-            jEdit.setProperty(OPTION_PREFIX + key, value);
+            preferences.put(key, value);
         }
-    }
-
-    @Override
-    public void remove(String key) {
-        jEdit.unsetProperty(OPTION_PREFIX + key);
-    }
-
-    @Override
-    public void putInt(String key, int value) {
-        jEdit.setProperty(OPTION_PREFIX + key, Integer.toString(value));
-    }
-
-    @Override
-    public int getInt(String key, int def) {
-        return Integer.valueOf(jEdit.getProperty(OPTION_PREFIX + key, Integer.toString(def)));
-    }
-
-    @Override
-    public void putLong(String key, long value) {
-        jEdit.setProperty(OPTION_PREFIX + key, Long.toString(value));
-    }
-
-    @Override
-    public long getLong(String key, long def) {
-        return Long.valueOf(jEdit.getProperty(OPTION_PREFIX + key, Long.toString(def)));
-    }
-
-    @Override
-    public void putBoolean(String key, boolean value) {
-        jEdit.setProperty(OPTION_PREFIX + key, Boolean.toString(value));
-    }
-
-    @Override
-    public boolean getBoolean(String key, boolean def) {
-        return Boolean.valueOf(jEdit.getProperty(OPTION_PREFIX + key, Boolean.toString(def)));
-    }
-
-    @Override
-    public void putFloat(String key, float value) {
-        jEdit.setProperty(OPTION_PREFIX + key, Float.toString(value));
-    }
-
-    @Override
-    public float getFloat(String key, float def) {
-        return Float.valueOf(jEdit.getProperty(OPTION_PREFIX + key, Float.toString(def)));
-    }
-
-    @Override
-    public void putDouble(String key, double value) {
-        jEdit.setProperty(OPTION_PREFIX + key, Double.toString(value));
-    }
-
-    @Override
-    public double getDouble(String key, double def) {
-        return Double.valueOf(jEdit.getProperty(OPTION_PREFIX + key, Double.toString(def)));
-    }
-
-    @Override
-    public void putByteArray(String key, byte[] value) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public byte[] getByteArray(String key, byte[] def) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**
@@ -132,6 +135,11 @@ public class PreferencesWrapper implements Preferences {
      */
     @Override
     public void flush() {
+        try {
+            preferences.flush();
+        } catch (BackingStoreException ex) {
+            Logger.getLogger(PreferencesWrapper.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -139,5 +147,15 @@ public class PreferencesWrapper implements Preferences {
      */
     @Override
     public void sync() {
+        try {
+            preferences.sync();
+        } catch (BackingStoreException ex) {
+            Logger.getLogger(PreferencesWrapper.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @Nonnull
+    public java.util.prefs.Preferences getInnerPreferences() {
+        return preferences;
     }
 }

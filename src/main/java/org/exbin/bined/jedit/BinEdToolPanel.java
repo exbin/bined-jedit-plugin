@@ -41,7 +41,6 @@ import org.exbin.bined.operation.BinaryDataCommand;
 import org.exbin.bined.operation.BinaryDataOperationException;
 import org.exbin.bined.operation.undo.BinaryDataUndoUpdateListener;
 import org.exbin.bined.swing.extended.ExtCodeArea;
-import org.exbin.framework.bined.FileHandlingMode;
 import org.exbin.framework.gui.action.gui.DropDownButton;
 import org.gjt.sp.jedit.GUIUtilities;
 import org.gjt.sp.jedit.gui.RolloverButton;
@@ -50,7 +49,7 @@ import org.gjt.sp.jedit.jEdit;
 /**
  * BinEd plugin tool panel.
  *
- * @version 0.2.0 2021/09/03
+ * @version 0.2.0 2021/11/08
  * @author ExBin Project (http://exbin.org)
  */
 @ParametersAreNonnullByDefault
@@ -80,16 +79,17 @@ public class BinEdToolPanel extends JPanel {
     private AbstractButton pasteButton;
     private AbstractButton saveButton;
 
-    public BinEdToolPanel(BinEdEditPanel editPanel) {
+    public BinEdToolPanel(BinEdEditPanel editPanel, AbstractAction optionsAction) {
         this.editPanel = editPanel;
         componentPanel = editPanel.getComponentPanel();
+        this.optionsAction = optionsAction;
+        final ExtCodeArea codeArea = componentPanel.getCodeArea();
         super.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
         codeTypeButtonGroup = new ButtonGroup();
         binaryCodeTypeAction = new JRadioButtonMenuItem(new AbstractAction("Binary") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ExtCodeArea codeArea = componentPanel.getCodeArea();
                 codeArea.setCodeType(CodeType.BINARY);
                 updateCycleButtonState();
             }
@@ -98,7 +98,6 @@ public class BinEdToolPanel extends JPanel {
         octalCodeTypeAction = new JRadioButtonMenuItem(new AbstractAction("Octal") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ExtCodeArea codeArea = componentPanel.getCodeArea();
                 codeArea.setCodeType(CodeType.OCTAL);
                 updateCycleButtonState();
             }
@@ -107,7 +106,6 @@ public class BinEdToolPanel extends JPanel {
         decimalCodeTypeAction = new JRadioButtonMenuItem(new AbstractAction("Decimal") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ExtCodeArea codeArea = componentPanel.getCodeArea();
                 codeArea.setCodeType(CodeType.DECIMAL);
                 updateCycleButtonState();
             }
@@ -116,7 +114,6 @@ public class BinEdToolPanel extends JPanel {
         hexadecimalCodeTypeAction = new JRadioButtonMenuItem(new AbstractAction("Hexadecimal") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ExtCodeArea codeArea = componentPanel.getCodeArea();
                 codeArea.setCodeType(CodeType.HEXADECIMAL);
                 updateCycleButtonState();
             }
@@ -125,7 +122,6 @@ public class BinEdToolPanel extends JPanel {
         cycleCodeTypesAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ExtCodeArea codeArea = componentPanel.getCodeArea();
                 int codeTypePos = codeArea.getCodeType().ordinal();
                 CodeType[] values = CodeType.values();
                 CodeType next = codeTypePos + 1 >= values.length ? values[0] : values[codeTypePos + 1];
@@ -142,8 +138,6 @@ public class BinEdToolPanel extends JPanel {
         cycleCodeTypesPopupMenu.add(hexadecimalCodeTypeAction);
         codeTypeDropDown = new DropDownButton(cycleCodeTypesAction, cycleCodeTypesPopupMenu);
         updateCycleButtonState();
-
-        optionsAction = componentPanel.createOptionsAction();
 
         showUnprintablesAction = new AbstractAction() {
             @Override

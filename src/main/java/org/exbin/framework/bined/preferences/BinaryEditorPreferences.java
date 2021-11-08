@@ -29,6 +29,7 @@ import org.exbin.bined.swing.extended.theme.ExtendedCodeAreaThemeProfile;
 import org.exbin.framework.bined.FileHandlingMode;
 import org.exbin.framework.editor.text.preferences.TextEncodingPreferences;
 import org.exbin.framework.editor.text.preferences.TextFontPreferences;
+import org.exbin.xbup.core.util.StringUtils;
 
 /**
  * Binary editor preferences.
@@ -65,10 +66,6 @@ public class BinaryEditorPreferences {
         themePreferences = new CodeAreaThemePreferences(preferences);
         colorPreferences = new CodeAreaColorPreferences(preferences);
 
-        convertOlderPreferences();
-    }
-
-    private void convertOlderPreferences() {
         final String legacyDef = "LEGACY";
         String storedVersion = preferences.get(PREFERENCES_VERSION, legacyDef);
         if ("0.2.0".equals(storedVersion)) {
@@ -168,8 +165,8 @@ public class BinaryEditorPreferences {
         encodingPreferences.setEncodings(new ArrayList<>(legacyPreferences.getEncodings()));
         Collection<String> legacyEncodings = legacyPreferences.getEncodings();
         List<String> encodings = new ArrayList<>(legacyEncodings);
-        if (!encodings.isEmpty() && !encodings.contains(TextEncodingPreferences.ENCODING_UTF8)) {
-            encodings.add(TextEncodingPreferences.ENCODING_UTF8);
+        if (!encodings.isEmpty() && !encodings.contains(StringUtils.ENCODING_UTF8)) {
+            encodings.add(StringUtils.ENCODING_UTF8);
         }
         encodingPreferences.setEncodings(encodings);
         fontPreferences.setUseDefaultFont(legacyPreferences.isUseDefaultFont());

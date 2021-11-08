@@ -26,6 +26,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.nio.charset.Charset;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
@@ -49,8 +50,11 @@ import org.exbin.bined.capability.CharsetCapable;
 import org.exbin.bined.extended.layout.ExtendedCodeAreaLayoutProfile;
 import org.exbin.bined.highlight.swing.extended.ExtendedHighlightNonAsciiCodeAreaPainter;
 import org.exbin.bined.jedit.BinEdApplyOptions;
-import org.exbin.bined.jedit.GoToPositionAction;
-import org.exbin.bined.jedit.SearchAction;
+import org.exbin.bined.jedit.action.CompareFilesAction;
+import org.exbin.bined.jedit.action.SearchAction;
+import org.exbin.bined.jedit.action.GoToPositionAction;
+import org.exbin.bined.jedit.action.InsertDataAction;
+import org.exbin.bined.jedit.JEditPreferencesWrapper;
 import org.exbin.bined.operation.BinaryDataCommand;
 import org.exbin.bined.operation.swing.CodeAreaOperationCommandHandler;
 import org.exbin.bined.operation.undo.BinaryDataUndoHandler;
@@ -82,12 +86,11 @@ import org.exbin.framework.gui.utils.WindowUtils;
 import org.exbin.framework.gui.utils.handler.OptionsControlHandler;
 import org.exbin.framework.gui.utils.gui.CloseControlPanel;
 import org.exbin.framework.gui.utils.gui.OptionsControlPanel;
-import org.exbin.framework.preferences.PreferencesWrapper;
 
 /**
  * Binary editor component panel.
  *
- * @version 0.2.0 2020/05/31
+ * @version 0.2.0 2021/11/08
  * @author ExBin Project (http://exbin.org)
  */
 public class BinEdComponentPanel extends javax.swing.JPanel {
@@ -108,7 +111,9 @@ public class BinEdComponentPanel extends javax.swing.JPanel {
     private TextEncodingStatusApi encodingStatus;
     private CharsetChangeListener charsetChangeListener = null;
     private ModifiedStateListener modifiedChangeListener = null;
-    private final GoToPositionAction goToRowAction;
+    private final GoToPositionAction goToPositionAction;
+    private final InsertDataAction insertDataAction;
+    private final CompareFilesAction compareFilesAction;
     private final AbstractAction showHeaderAction;
     private final AbstractAction showRowNumbersAction;
     private final SearchAction searchAction;
@@ -124,7 +129,7 @@ public class BinEdComponentPanel extends javax.swing.JPanel {
     public BinEdComponentPanel() {
         initComponents();
 
-        preferences = new BinaryEditorPreferences(new PreferencesWrapper());
+        preferences = new BinaryEditorPreferences(new JEditPreferencesWrapper());
 
         codeArea = new ExtCodeArea();
         codeArea.setPainter(new ExtendedHighlightNonAsciiCodeAreaPainter(codeArea));
@@ -137,7 +142,9 @@ public class BinEdComponentPanel extends javax.swing.JPanel {
         toolbarPanel = new BinEdToolbarPanel(preferences, codeArea, createOptionsAction());
         statusPanel = new BinaryStatusPanel();
 
-        goToRowAction = new GoToPositionAction(codeArea);
+        insertDataAction = new InsertDataAction(codeArea);
+        compareFilesAction = new CompareFilesAction(codeArea);
+        goToPositionAction = new GoToPositionAction(codeArea);
         showHeaderAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -201,11 +208,12 @@ public class BinEdComponentPanel extends javax.swing.JPanel {
                 int clickedX = x;
                 int clickedY = y;
                 if (invoker instanceof JViewport) {
-                    clickedX += ((JViewport) invoker).getParent().getX();
-                    clickedY += ((JViewport) invoker).getParent().getY();
+                    clickedX += invoker.getParent().getX();
+                    clickedY += invoker.getParent().getY();
                 }
-                JPopupMenu popupMenu = createContextMenu(clickedX, clickedY);
-                popupMenu.show(invoker, x, y);
+                removeAll();
+                createContextMenu(this, clickedX, clickedY);
+                super.show(invoker, x, y);
             }
         });
 
@@ -228,7 +236,7 @@ public class BinEdComponentPanel extends javax.swing.JPanel {
                             break;
                         }
                         case KeyEvent.VK_G: {
-                            goToRowAction.actionPerformed(new ActionEvent(keyEvent.getSource(), keyEvent.getID(), ""));
+                            goToPositionAction.actionPerformed(new ActionEvent(keyEvent.getSource(), keyEvent.getID(), ""));
                             break;
                         }
                     }
@@ -257,7 +265,7 @@ public class BinEdComponentPanel extends javax.swing.JPanel {
 
             @Override
             public void changeCursorPosition() {
-                goToRowAction.actionPerformed(new ActionEvent(BinEdComponentPanel.this, 0, ""));
+                goToPositionAction.actionPerformed(new ActionEvent(BinEdComponentPanel.this, 0, ""));
             }
 
             @Override
@@ -355,21 +363,6 @@ public class BinEdComponentPanel extends javax.swing.JPanel {
         return true;
     }
 
-    public void setContentData(BinaryData data) {
-        codeArea.setContentData(data);
-
-        documentOriginalSize = codeArea.getDataSize();
-        updateCurrentDocumentSize();
-        updateCurrentMemoryMode();
-
-        // Autodetect encoding using IDE mechanism
-//        final Charset charset = Charset.forName(FileEncodingQuery.getEncoding(dataObject.getPrimaryFile()).name());
-//        if (charsetChangeListener != null) {
-//            charsetChangeListener.charsetChanged();
-//        }
-//        codeArea.setCharset(charset);
-    }
-
     private void saveDocument() {
         fileApi.saveDocument();
 
@@ -412,6 +405,8 @@ public class BinEdComponentPanel extends javax.swing.JPanel {
         if (modifiedChangeListener != null) {
             modifiedChangeListener.modifiedChanged();
         }
+
+        toolbarPanel.updateModified(isModified());
     }
 
     /**
@@ -446,64 +441,62 @@ public class BinEdComponentPanel extends javax.swing.JPanel {
     // End of variables declaration//GEN-END:variables
 
     @Nonnull
-    private JPopupMenu createContextMenu(int x, int y) {
-        final JPopupMenu result = new JPopupMenu();
-
+    private void createContextMenu(JPopupMenu menu, int x, int y) {
         BasicCodeAreaZone positionZone = codeArea.getPainter().getPositionZone(x, y);
 
         switch (positionZone) {
             case TOP_LEFT_CORNER:
             case HEADER: {
-                result.add(createShowHeaderMenuItem());
-                result.add(createPositionCodeTypeMenuItem());
+                menu.add(createShowHeaderMenuItem());
+                menu.add(createPositionCodeTypeMenuItem());
                 break;
             }
             case ROW_POSITIONS: {
-                result.add(createShowRowPositionMenuItem());
-                result.add(createPositionCodeTypeMenuItem());
-                result.add(new JSeparator());
-                result.add(createGoToMenuItem());
+                menu.add(createShowRowPositionMenuItem());
+                menu.add(createPositionCodeTypeMenuItem());
+                menu.add(new JSeparator());
+                menu.add(createGoToMenuItem());
 
                 break;
             }
             default: {
                 final JMenuItem cutMenuItem = new JMenuItem("Cut");
-                cutMenuItem.setIcon(new ImageIcon(getClass().getResource("/org/exbin/framework/gui/menu/resources/icons/tango-icon-theme/16x16/actions/edit-cut.png")));
+                cutMenuItem.setIcon(new ImageIcon(getClass().getResource("/org/exbin/framework/gui/action/resources/icons/tango-icon-theme/16x16/actions/edit-cut.png")));
                 cutMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, ActionUtils.getMetaMask()));
                 cutMenuItem.setEnabled(codeArea.hasSelection() && codeArea.isEditable());
                 cutMenuItem.addActionListener((ActionEvent e) -> {
                     codeArea.cut();
-                    result.setVisible(false);
+                    menu.setVisible(false);
                 });
-                result.add(cutMenuItem);
+                menu.add(cutMenuItem);
 
                 final JMenuItem copyMenuItem = new JMenuItem("Copy");
-                copyMenuItem.setIcon(new ImageIcon(getClass().getResource("/org/exbin/framework/gui/menu/resources/icons/tango-icon-theme/16x16/actions/edit-copy.png")));
+                copyMenuItem.setIcon(new ImageIcon(getClass().getResource("/org/exbin/framework/gui/action/resources/icons/tango-icon-theme/16x16/actions/edit-copy.png")));
                 copyMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionUtils.getMetaMask()));
                 copyMenuItem.setEnabled(codeArea.hasSelection());
                 copyMenuItem.addActionListener((ActionEvent e) -> {
                     codeArea.copy();
-                    result.setVisible(false);
+                    menu.setVisible(false);
                 });
-                result.add(copyMenuItem);
+                menu.add(copyMenuItem);
 
                 final JMenuItem copyAsCodeMenuItem = new JMenuItem("Copy as Code");
                 copyAsCodeMenuItem.setEnabled(codeArea.hasSelection());
                 copyAsCodeMenuItem.addActionListener((ActionEvent e) -> {
                     codeArea.copyAsCode();
-                    result.setVisible(false);
+                    menu.setVisible(false);
                 });
-                result.add(copyAsCodeMenuItem);
+                menu.add(copyAsCodeMenuItem);
 
                 final JMenuItem pasteMenuItem = new JMenuItem("Paste");
-                pasteMenuItem.setIcon(new ImageIcon(getClass().getResource("/org/exbin/framework/gui/menu/resources/icons/tango-icon-theme/16x16/actions/edit-paste.png")));
+                pasteMenuItem.setIcon(new ImageIcon(getClass().getResource("/org/exbin/framework/gui/action/resources/icons/tango-icon-theme/16x16/actions/edit-paste.png")));
                 pasteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, ActionUtils.getMetaMask()));
                 pasteMenuItem.setEnabled(codeArea.canPaste() && codeArea.isEditable());
                 pasteMenuItem.addActionListener((ActionEvent e) -> {
                     codeArea.paste();
-                    result.setVisible(false);
+                    menu.setVisible(false);
                 });
-                result.add(pasteMenuItem);
+                menu.add(pasteMenuItem);
 
                 final JMenuItem pasteFromCodeMenuItem = new JMenuItem("Paste from Code");
                 pasteFromCodeMenuItem.setEnabled(codeArea.canPaste() && codeArea.isEditable());
@@ -513,33 +506,36 @@ public class BinEdComponentPanel extends javax.swing.JPanel {
                     } catch (IllegalArgumentException ex) {
                         JOptionPane.showMessageDialog(codeArea, ex.getMessage(), "Unable to Paste Code", JOptionPane.ERROR_MESSAGE);
                     }
-                    result.setVisible(false);
+                    menu.setVisible(false);
                 });
-                result.add(pasteFromCodeMenuItem);
+                menu.add(pasteFromCodeMenuItem);
 
                 final JMenuItem deleteMenuItem = new JMenuItem("Delete");
-                deleteMenuItem.setIcon(new ImageIcon(getClass().getResource("/org/exbin/framework/gui/menu/resources/icons/tango-icon-theme/16x16/actions/edit-delete.png")));
+                deleteMenuItem.setIcon(new ImageIcon(getClass().getResource("/org/exbin/framework/gui/action/resources/icons/tango-icon-theme/16x16/actions/edit-delete.png")));
                 deleteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
                 deleteMenuItem.setEnabled(codeArea.hasSelection() && codeArea.isEditable());
                 deleteMenuItem.addActionListener((ActionEvent e) -> {
                     codeArea.delete();
-                    result.setVisible(false);
+                    menu.setVisible(false);
                 });
-                result.add(deleteMenuItem);
-                result.addSeparator();
+                menu.add(deleteMenuItem);
+                menu.addSeparator();
 
                 final JMenuItem selectAllMenuItem = new JMenuItem("Select All");
-                selectAllMenuItem.setIcon(new ImageIcon(getClass().getResource("/org/exbin/framework/gui/menu/resources/icons/tango-icon-theme/16x16/actions/edit-select-all.png")));
+                selectAllMenuItem.setIcon(new ImageIcon(getClass().getResource("/org/exbin/framework/gui/action/resources/icons/tango-icon-theme/16x16/actions/edit-select-all.png")));
                 selectAllMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, ActionUtils.getMetaMask()));
                 selectAllMenuItem.addActionListener((ActionEvent e) -> {
                     codeArea.selectAll();
-                    result.setVisible(false);
+                    menu.setVisible(false);
                 });
-                result.add(selectAllMenuItem);
-                result.addSeparator();
+                menu.add(selectAllMenuItem);
+                menu.addSeparator();
+
+                JMenuItem insertDataMenuItem = createInsertDataMenuItem();
+                menu.add(insertDataMenuItem);
 
                 JMenuItem goToMenuItem = createGoToMenuItem();
-                result.add(goToMenuItem);
+                menu.add(goToMenuItem);
 
                 final JMenuItem findMenuItem = new JMenuItem("Find...");
                 findMenuItem.setIcon(new ImageIcon(getClass().getResource("/org/exbin/framework/bined/resources/icons/tango-icon-theme/16x16/actions/edit-find.png")));
@@ -548,7 +544,7 @@ public class BinEdComponentPanel extends javax.swing.JPanel {
                     searchAction.actionPerformed(e);
                     searchAction.switchReplaceMode(BinarySearchPanel.SearchOperation.FIND);
                 });
-                result.add(findMenuItem);
+                menu.add(findMenuItem);
 
                 final JMenuItem replaceMenuItem = new JMenuItem("Replace...");
                 replaceMenuItem.setIcon(new ImageIcon(getClass().getResource("/org/exbin/framework/bined/resources/icons/tango-icon-theme/16x16/actions/edit-find-replace.png")));
@@ -558,11 +554,11 @@ public class BinEdComponentPanel extends javax.swing.JPanel {
                     searchAction.actionPerformed(e);
                     searchAction.switchReplaceMode(BinarySearchPanel.SearchOperation.REPLACE);
                 });
-                result.add(replaceMenuItem);
+                menu.add(replaceMenuItem);
             }
         }
 
-        result.addSeparator();
+        menu.addSeparator();
 
         switch (positionZone) {
             case TOP_LEFT_CORNER:
@@ -574,14 +570,17 @@ public class BinEdComponentPanel extends javax.swing.JPanel {
                 JMenu showMenu = new JMenu("Show");
                 showMenu.add(createShowHeaderMenuItem());
                 showMenu.add(createShowRowPositionMenuItem());
-                result.add(showMenu);
+                menu.add(showMenu);
             }
         }
+
+        JMenuItem compareFilesMenuItem = createCompareFilesMenuItem();
+        menu.add(compareFilesMenuItem);
 
         final JMenuItem optionsMenuItem = new JMenuItem("Options...");
         optionsMenuItem.setIcon(new ImageIcon(getClass().getResource("/org/exbin/framework/gui/options/resources/icons/Preferences16.gif")));
         optionsMenuItem.addActionListener(createOptionsAction());
-        result.add(optionsMenuItem);
+        menu.add(optionsMenuItem);
 
         switch (positionZone) {
             case TOP_LEFT_CORNER:
@@ -590,7 +589,7 @@ public class BinEdComponentPanel extends javax.swing.JPanel {
                 break;
             }
             default: {
-                result.addSeparator();
+                menu.addSeparator();
                 final JMenuItem aboutMenuItem = new JMenuItem("About...");
                 aboutMenuItem.addActionListener((ActionEvent e) -> {
                     AboutPanel aboutPanel = new AboutPanel();
@@ -604,11 +603,9 @@ public class BinEdComponentPanel extends javax.swing.JPanel {
                     //            dialog.setSize(650, 460);
                     dialog.showCentered((Component) e.getSource());
                 });
-                result.add(aboutMenuItem);
+                menu.add(aboutMenuItem);
             }
         }
-
-        return result;
     }
 
     @Nonnull
@@ -664,8 +661,23 @@ public class BinEdComponentPanel extends javax.swing.JPanel {
     private JMenuItem createGoToMenuItem() {
         final JMenuItem goToMenuItem = new JMenuItem("Go To...");
         goToMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, ActionUtils.getMetaMask()));
-        goToMenuItem.addActionListener(goToRowAction);
+        goToMenuItem.addActionListener(goToPositionAction);
         return goToMenuItem;
+    }
+
+    @Nonnull
+    private JMenuItem createInsertDataMenuItem() {
+        final JMenuItem insertDataMenuItem = new JMenuItem("Insert Data...");
+        insertDataMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, ActionUtils.getMetaMask()));
+        insertDataMenuItem.addActionListener(insertDataAction);
+        return insertDataMenuItem;
+    }
+
+    @Nonnull
+    private JMenuItem createCompareFilesMenuItem() {
+        final JMenuItem compareFilesMenuItem = new JMenuItem("Compare Files...");
+        compareFilesMenuItem.addActionListener(compareFilesAction);
+        return compareFilesMenuItem;
     }
 
     @Nonnull
@@ -877,11 +889,13 @@ public class BinEdComponentPanel extends javax.swing.JPanel {
 
     public void setUndoHandler(BinaryDataUndoHandler undoHandler) {
         this.undoHandler = undoHandler;
+        toolbarPanel.setUndoHandler(undoHandler);
         CodeAreaOperationCommandHandler commandHandler = new CodeAreaOperationCommandHandler(codeArea, undoHandler);
         codeArea.setCommandHandler(commandHandler);
         if (valuesPanel != null) {
             valuesPanel.setCodeArea(codeArea, undoHandler);
         }
+        insertDataAction.setUndoHandler(undoHandler);
         // TODO set ENTER KEY mode in apply options
 
         undoHandler.addUndoUpdateListener(new BinaryDataUndoUpdateListener() {
@@ -898,6 +912,26 @@ public class BinEdComponentPanel extends javax.swing.JPanel {
                 notifyModified();
             }
         });
+    }
+
+    @Nullable
+    public BinaryData getContentData() {
+        return codeArea.getContentData();
+    }
+
+    public void setContentData(BinaryData data) {
+        codeArea.setContentData(data);
+
+        documentOriginalSize = codeArea.getDataSize();
+        updateCurrentDocumentSize();
+        updateCurrentMemoryMode();
+
+        // Autodetect encoding using IDE mechanism
+//        final Charset charset = Charset.forName(FileEncodingQuery.getEncoding(dataObject.getPrimaryFile()).name());
+//        if (charsetChangeListener != null) {
+//            charsetChangeListener.charsetChanged();
+//        }
+//        codeArea.setCharset(charset);
     }
 
     public interface CharsetChangeListener {

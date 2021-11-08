@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.exbin.bined.jedit;
+package org.exbin.bined.jedit.action;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;

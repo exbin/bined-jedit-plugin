@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import org.exbin.framework.preferences.PreferencesWrapper;
+import org.exbin.bined.jedit.JEditPreferencesWrapper;
 import org.gjt.sp.jedit.EditPlugin;
 
 /**
@@ -26,7 +26,7 @@ import org.gjt.sp.jedit.EditPlugin;
 public class BinEdPlugin extends EditPlugin {
 
     public static final String NAME = "bined";
-    public static final String OPTION_PREFIX = PreferencesWrapper.OPTION_PREFIX;
+    public static final String OPTION_PREFIX = JEditPreferencesWrapper.OPTION_PREFIX;
 
     public BinEdPlugin() {
     }

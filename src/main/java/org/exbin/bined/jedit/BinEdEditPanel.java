@@ -55,14 +55,16 @@ public class BinEdEditPanel extends JPanel implements EBComponent, BinEdActions,
 
         editorFile = new BinEdFile();
 
-        this.toolPanel = new BinEdToolPanel(this);
+        BinEdComponentPanel editorFilePanel = editorFile.getPanel();
+
+        this.toolPanel = new BinEdToolPanel(this, editorFilePanel.createOptionsAction());
         super.add(BorderLayout.NORTH, this.toolPanel);
 
         if (floating) {
             super.setPreferredSize(new Dimension(500, 250));
         }
 
-        super.add(BorderLayout.CENTER, editorFile.getPanel());
+        super.add(BorderLayout.CENTER, editorFilePanel);
         editorFile.newFile();
     }
 

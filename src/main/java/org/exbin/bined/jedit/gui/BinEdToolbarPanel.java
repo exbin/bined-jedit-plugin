@@ -25,6 +25,7 @@ import javax.swing.JButton;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import org.exbin.bined.CodeType;
+import org.exbin.bined.operation.undo.BinaryDataUndoHandler;
 import org.exbin.bined.swing.extended.ExtCodeArea;
 import org.exbin.framework.bined.preferences.BinaryEditorPreferences;
 import org.exbin.framework.gui.action.gui.DropDownButton;
@@ -135,6 +136,10 @@ public class BinEdToolbarPanel extends javax.swing.JPanel {
 
     }
 
+    public void setUndoHandler(BinaryDataUndoHandler undoHandler) {
+        // ignore in this toolbar
+    }
+
     private void updateCycleButtonState() {
         CodeType codeType = codeArea.getCodeType();
         codeTypeDropDown.setActionText(codeType.name().substring(0, 3));
@@ -179,6 +184,10 @@ public class BinEdToolbarPanel extends javax.swing.JPanel {
 
     public void updateUnprintables() {
         showUnprintablesToggleButton.setSelected(codeArea.isShowUnprintables());
+    }
+    
+    public void updateModified(boolean modified) {
+        // ignore
     }
     
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents

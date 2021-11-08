@@ -30,6 +30,7 @@ import org.exbin.framework.gui.utils.WindowUtils;
 import org.exbin.framework.gui.options.api.OptionsCapable;
 import org.exbin.framework.gui.options.api.OptionsModifiedListener;
 import org.exbin.framework.editor.text.service.TextEncodingService;
+import org.exbin.xbup.core.util.StringUtils;
 
 /**
  * Text encoding options panel.
@@ -285,7 +286,7 @@ public class TextEncodingOptionsPanel extends javax.swing.JPanel implements Opti
         public void setAvailableEncodings(List<String> encodings) {
             availableEncodings = new ArrayList<>();
             if (encodings.isEmpty()) {
-                availableEncodings.add(TextEncodingPreferences.ENCODING_UTF8);
+                availableEncodings.add(StringUtils.ENCODING_UTF8);
             } else {
                 availableEncodings.addAll(encodings);
             }
