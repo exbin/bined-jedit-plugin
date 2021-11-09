@@ -33,7 +33,7 @@ bined.redo.icon=Redo.png
 bined.cut.icon=Cut.png
 bined.copy.icon=Copy.png
 bined.paste.icon=Paste.png
-bined.options.icon=/org/exbin/framework/gui/options/resources/icons/Preferences16.gif
+bined.options.icon=/org/exbin/bined/jedit/resources/icons/preferences-system-2.png
 bined.show-unprintables.icon=/org/exbin/bined/jedit/resources/icons/insert-pilcrow_disabled.png
 bined.show-unprintables.selectedIcon=/org/exbin/bined/jedit/resources/icons/insert-pilcrow.png
 

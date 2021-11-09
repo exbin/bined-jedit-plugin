@@ -21,27 +21,27 @@ import java.io.File;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import org.exbin.bined.jedit.gui.BinEdComponentPanel;
 import org.gjt.sp.jedit.EBComponent;
 import org.gjt.sp.jedit.EBMessage;
 import org.gjt.sp.jedit.GUIUtilities;
 import org.gjt.sp.jedit.View;
+import org.gjt.sp.jedit.browser.VFSBrowser;
 import org.gjt.sp.jedit.gui.DefaultFocusComponent;
 import org.gjt.sp.jedit.gui.DockableWindowManager;
 
 /**
  * BinEd edit panel class.
  *
- * @version 0.2.0 2020/06/01
+ * @version 0.2.0 2021/11/09
  * @author ExBin Project (http://exbin.org)
  */
 @ParametersAreNonnullByDefault
 public class BinEdEditPanel extends JPanel implements EBComponent, BinEdActions, DefaultFocusComponent {
 
     @Nullable
-    private String fileName;
+    private File file;
     private View view;
     private boolean floating;
 
@@ -54,6 +54,7 @@ public class BinEdEditPanel extends JPanel implements EBComponent, BinEdActions,
         this.floating = position.equals(DockableWindowManager.FLOATING);
 
         editorFile = new BinEdFile();
+        editorFile.setView(view);
 
         BinEdComponentPanel editorFilePanel = editorFile.getPanel();
 
@@ -75,19 +76,25 @@ public class BinEdEditPanel extends JPanel implements EBComponent, BinEdActions,
 
     @Override
     public void chooseFile() {
-        String[] paths = GUIUtilities.showVFSFileDialog(view, null, JFileChooser.OPEN_DIALOG, false);
+        String[] paths = GUIUtilities.showVFSFileDialog(view, file == null ? null : file.getParent(), VFSBrowser.OPEN_DIALOG, false);
 
-        if (paths != null && !paths[0].equals(fileName)) {
+        if (paths != null && paths.length > 0) {
             editorFile.releaseFile();
-            fileName = paths[0];
+            file = new File(paths[0]);
             toolPanel.propertiesChanged();
-            editorFile.openFile(new File(fileName));
+            editorFile.openFile(file);
         }
     }
 
     @Override
     public void saveFile() {
-        editorFile.saveFile();
+        String[] paths = GUIUtilities.showVFSFileDialog(view, file == null ? null : file.getAbsolutePath(), VFSBrowser.SAVE_DIALOG, false);
+
+        if (paths != null && paths.length > 0) {
+            file = new File(paths[0]);
+            toolPanel.propertiesChanged();
+            editorFile.saveToFile(file);
+        }
     }
 
     @Override
@@ -102,7 +109,7 @@ public class BinEdEditPanel extends JPanel implements EBComponent, BinEdActions,
 
     @Nonnull
     public String getFileName() {
-        return fileName;
+        return file == null ? "" : file.getAbsolutePath();
     }
 
     @Nonnull

@@ -32,28 +32,33 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.gjt.sp.jedit.GUIUtilities;
+import org.gjt.sp.jedit.View;
 
 /**
  * Compare files action.
  *
- * @version 0.2.0 2021/11/08
+ * @version 0.2.0 2021/11/09
  * @author ExBin Project (http://exbin.org)
  */
 @ParametersAreNonnullByDefault
 public class CompareFilesAction implements ActionListener {
 
     private final ExtCodeArea codeArea;
+    private View view;
 
     public CompareFilesAction(ExtCodeArea codeArea) {
         this.codeArea = Objects.requireNonNull(codeArea);
+    }
+
+    public void setView(View view) {
+        this.view = view;
     }
 
     @Override
@@ -74,25 +79,24 @@ public class CompareFilesAction implements ActionListener {
             @Override
             public CompareFilesPanel.FileRecord openFile() {
                 final File[] result = new File[1];
-                throw new UnsupportedOperationException("Not supported yet.");
-//                GuiFileModuleApi fileModule = application.getModuleRepository().getModuleByInterface(GuiFileModuleApi.class);
-//                fileModule.getFileActions().openFile((URI fileUri, FileType fileType) -> {
-//                    result[0] = new File(fileUri);
-//                }, new AllFileTypes(), editorProvider);
-//
-//                if (result[0] == null) {
-//                    return null;
-//                }
-//
-//                try (FileInputStream stream = new FileInputStream(result[0])) {
-//                    PagedData pagedData = new PagedData();
-//                    pagedData.loadFromStream(stream);
-//                    return new CompareFilesPanel.FileRecord(result[0].getAbsolutePath(), pagedData);
-//                } catch (IOException ex) {
-//                    Logger.getLogger(CompareFilesAction.class.getName()).log(Level.SEVERE, null, ex);
-//
-//                }
-//                return null;
+                String[] paths = GUIUtilities.showVFSFileDialog(view, null, JFileChooser.OPEN_DIALOG, false);
+
+                if (paths != null && paths.length > 0) {
+                    result[0] = new File(paths[0]);
+                }
+
+                if (result[0] == null) {
+                    return null;
+                }
+
+                try (FileInputStream stream = new FileInputStream(result[0])) {
+                    PagedData pagedData = new PagedData();
+                    pagedData.loadFromStream(stream);
+                    return new CompareFilesPanel.FileRecord(result[0].getAbsolutePath(), pagedData);
+                } catch (IOException ex) {
+                    Logger.getLogger(CompareFilesAction.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                return null;
             }
 
             @Nonnull

@@ -19,6 +19,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.swing.Action;
 import javax.swing.JButton;
@@ -28,7 +29,7 @@ import javax.swing.JPopupMenu;
 /**
  * Drop down button.
  *
- * @version 0.2.1 2019/08/18
+ * @version 0.2.1 2021/10/30
  * @author ExBin Project (http://exbin.org)
  */
 @ParametersAreNonnullByDefault
@@ -48,6 +49,9 @@ public class DropDownButton extends JButton {
         setFocusable(false);
         setActionText((String) action.getValue(Action.NAME));
         addActionListener(action);
+        action.addPropertyChangeListener((PropertyChangeEvent evt) -> {
+            setEnabled(action.isEnabled());
+        });
         setToolTipText((String) action.getValue(Action.SHORT_DESCRIPTION));
 
         setMargin(new Insets(0, 0, 0, 0));

@@ -42,11 +42,12 @@ import org.exbin.bined.jedit.gui.BinEdComponentPanel;
 import org.exbin.bined.operation.swing.CodeAreaUndoHandler;
 import org.exbin.bined.swing.extended.ExtCodeArea;
 import org.exbin.framework.bined.FileHandlingMode;
+import org.gjt.sp.jedit.View;
 
 /**
  * File editor wrapper using BinEd editor component.
  *
- * @version 0.2.0 2020/06/01
+ * @version 0.2.0 2021/11/09
  * @author ExBin Project (http://exbin.org)
  */
 @ParametersAreNonnullByDefault
@@ -103,6 +104,10 @@ public class BinEdFile implements BinEdComponentFileApi {
     @Nonnull
     public BinEdComponentPanel getPanel() {
         return componentPanel;
+    }
+
+    public void setView(View view) {
+        componentPanel.setView(view);
     }
 
     @Nonnull
@@ -171,10 +176,10 @@ public class BinEdFile implements BinEdComponentFileApi {
 
     public void saveFile() {
         ExtCodeArea codeArea = componentPanel.getCodeArea();
-        BinaryData data = codeArea.getContentData();
-        if (data instanceof DeltaDocument) {
+        BinaryData contentData = codeArea.getContentData();
+        if (contentData instanceof DeltaDocument) {
             try {
-                segmentsRepository.saveDocument((DeltaDocument) data);
+                segmentsRepository.saveDocument((DeltaDocument) contentData);
             } catch (IOException ex) {
                 Logger.getLogger(BinEdFile.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -183,7 +188,6 @@ public class BinEdFile implements BinEdComponentFileApi {
             try {
                 stream = new FileOutputStream(file);
                 try {
-                    BinaryData contentData = codeArea.getContentData();
                     if (contentData != null) {
                         contentData.saveToStream(stream);
                     }
@@ -198,6 +202,25 @@ public class BinEdFile implements BinEdComponentFileApi {
             } catch (IOException ex) {
                 Logger.getLogger(BinEdFile.class.getName()).log(Level.SEVERE, null, ex);
             }
+        }
+    }
+
+    public void saveToFile(File targetFile) {
+        try {
+            file = targetFile;
+            ExtCodeArea codeArea = componentPanel.getCodeArea();
+            BinaryData contentData = codeArea.getContentData();
+            if (contentData instanceof DeltaDocument) {
+                DeltaDocument document = (DeltaDocument) contentData;
+                FileDataSource fileSource = document.getFileSource();
+                if (fileSource == null || !file.equals(fileSource.getFile())) {
+                    fileSource = segmentsRepository.openFileSource(file);
+                    document.setFileSource(fileSource);
+                }
+            }
+            saveFile();
+        } catch (IOException ex) {
+            Logger.getLogger(BinEdFile.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -290,7 +313,6 @@ public class BinEdFile implements BinEdComponentFileApi {
     }
 
     private void setNewData() {
-        ExtCodeArea codeArea = componentPanel.getCodeArea();
         FileHandlingMode fileHandlingMode = componentPanel.getFileHandlingMode();
         if (fileHandlingMode == FileHandlingMode.DELTA) {
             componentPanel.setContentData(segmentsRepository.createDocument());

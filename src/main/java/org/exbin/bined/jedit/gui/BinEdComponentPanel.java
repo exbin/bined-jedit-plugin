@@ -27,6 +27,7 @@ import java.awt.event.MouseEvent;
 import java.nio.charset.Charset;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
@@ -86,6 +87,7 @@ import org.exbin.framework.gui.utils.WindowUtils;
 import org.exbin.framework.gui.utils.handler.OptionsControlHandler;
 import org.exbin.framework.gui.utils.gui.CloseControlPanel;
 import org.exbin.framework.gui.utils.gui.OptionsControlPanel;
+import org.gjt.sp.jedit.View;
 
 /**
  * Binary editor component panel.
@@ -93,6 +95,7 @@ import org.exbin.framework.gui.utils.gui.OptionsControlPanel;
  * @version 0.2.0 2021/11/08
  * @author ExBin Project (http://exbin.org)
  */
+@ParametersAreNonnullByDefault
 public class BinEdComponentPanel extends javax.swing.JPanel {
 
     private static final FileHandlingMode DEFAULT_FILE_HANDLING_MODE = FileHandlingMode.DELTA;
@@ -291,6 +294,10 @@ public class BinEdComponentPanel extends javax.swing.JPanel {
                 }
             }
         });
+    }
+
+    public void setView(View view) {
+        compareFilesAction.setView(view);
     }
 
     public BinEdComponentFileApi getFileApi() {
