@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,8 +17,8 @@ package org.exbin.bined.jedit.action;
 
 import java.awt.Component;
 import java.awt.Dialog;
-import org.exbin.auxiliary.paged_data.ByteArrayEditableData;
-import org.exbin.auxiliary.paged_data.EditableBinaryData;
+import org.exbin.auxiliary.binary_data.ByteArrayEditableData;
+import org.exbin.auxiliary.binary_data.EditableBinaryData;
 import org.exbin.bined.CodeAreaUtils;
 import org.exbin.bined.EditOperation;
 import org.exbin.bined.operation.BinaryDataOperationException;
@@ -47,8 +47,7 @@ import javax.swing.SwingUtilities;
 /**
  * Insert data action.
  *
- * @version 0.2.0 2021/11/08
- * @author ExBin Project (http://exbin.org)
+ * @author ExBin Project (https://exbin.org)
  */
 @ParametersAreNonnullByDefault
 public class InsertDataAction implements ActionListener {

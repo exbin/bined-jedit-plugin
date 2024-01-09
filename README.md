@@ -1,7 +1,7 @@
-BinEd - Binary/Hexadecimal Editor jEdit Plugin
-==============================================
+BinEd - Binary/Hex Editor jEdit Plugin
+======================================
 
-Hexadecimal viewer/editor extension for jEdit. See https://www.jedit.org  
+Hex editor/viewer extension for jEdit. See https://www.jedit.org  
 
 Homepage: https://bined.exbin.org/jedit-plugin/  
 

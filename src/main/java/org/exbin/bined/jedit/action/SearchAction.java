@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,14 +41,13 @@ import org.exbin.framework.bined.ReplaceParameters;
 import org.exbin.framework.bined.SearchCondition;
 import org.exbin.framework.bined.SearchParameters;
 import org.exbin.framework.gui.utils.ActionUtils;
-import org.exbin.auxiliary.paged_data.BinaryData;
-import org.exbin.auxiliary.paged_data.EditableBinaryData;
+import org.exbin.auxiliary.binary_data.BinaryData;
+import org.exbin.auxiliary.binary_data.EditableBinaryData;
 
 /**
  * Search action.
  *
- * @version 0.2.0 2019/03/20
- * @author ExBin Project (http://exbin.org)
+ * @author ExBin Project (https://exbin.org)
  */
 @ParametersAreNonnullByDefault
 public final class SearchAction implements ActionListener {
@@ -172,7 +171,7 @@ public final class SearchAction implements ActionListener {
             binarySearchPanel.requestSearchFocus();
         }
     }
-    
+
     public void switchReplaceMode(BinarySearchPanel.SearchOperation searchOperation) {
         binarySearchPanel.switchReplaceMode(searchOperation);
     }

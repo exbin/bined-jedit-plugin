@@ -12,7 +12,8 @@ buildscript {
 }
 import org.gradle.util.VersionNumber
 
-String binedVersion = '0.2.1-SNAPSHOT';
+String binedVersion = '0.2.1';
+String binaryDataVersion = '0.2.1';
 
 sourceCompatibility = '1.8'
 
@@ -89,8 +90,9 @@ dependencies {
     implementation ":bined-operation-swing-${binedVersion}"
     implementation ":bined-swing-${binedVersion}"
     implementation ":bined-swing-extended-${binedVersion}"
-    implementation ":paged_data-0.2.1-SNAPSHOT"
-    implementation ":paged_data-delta-0.2.1-SNAPSHOT"
+    implementation ":binary_data-${binaryDataVersion}"
+    implementation ":binary_data-paged-${binaryDataVersion}"
+    implementation ":binary_data-delta-${binaryDataVersion}"
     implementation ':jsr305-3.0.2'
     testImplementation group : 'junit', name: 'junit', version: '4.13.2'
 }
