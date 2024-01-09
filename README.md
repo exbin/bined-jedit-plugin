@@ -29,4 +29,4 @@ Java Development Kit (JDK) version 8 or later is required to build this project.
 License
 -------
 
-Apache License, Version 2.0 - see LICENSE-2.0.txt
+Apache License, Version 2.0 - see LICENSE.txt
