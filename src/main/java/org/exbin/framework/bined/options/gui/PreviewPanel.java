@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 import org.exbin.auxiliary.binary_data.ByteArrayEditableData;
 import org.exbin.bined.EditMode;
 import org.exbin.bined.RowWrappingMode;
@@ -29,14 +30,15 @@ import org.exbin.bined.SelectionRange;
 import org.exbin.bined.highlight.swing.extended.ExtendedHighlightCodeAreaPainter;
 import org.exbin.bined.highlight.swing.extended.ExtendedHighlightNonAsciiCodeAreaPainter;
 import org.exbin.bined.swing.extended.ExtCodeArea;
-import org.exbin.framework.gui.utils.LanguageUtils;
-import org.exbin.framework.gui.utils.WindowUtils;
+import org.exbin.framework.utils.LanguageUtils;
+import org.exbin.framework.utils.WindowUtils;
 
 /**
  * Preview panel for code area.
  *
  * @author ExBin Project (https://exbin.org)
  */
+@ParametersAreNonnullByDefault
 public class PreviewPanel extends javax.swing.JPanel {
 
     private final java.util.ResourceBundle resourceBundle = LanguageUtils.getResourceBundleByClass(PreviewPanel.class);
@@ -61,6 +63,7 @@ public class PreviewPanel extends javax.swing.JPanel {
 
     private void init() {
         codeArea = new ExtCodeArea();
+        codeArea.setFocusTraversalKeysEnabled(false);
         initPreviewCodeArea();
         this.add(codeArea, BorderLayout.CENTER);
     }

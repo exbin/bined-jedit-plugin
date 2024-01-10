@@ -25,12 +25,12 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import javax.swing.JPanel;
 import org.exbin.bined.basic.PositionScrollVisibility;
 import org.exbin.bined.swing.extended.ExtCodeArea;
-import org.exbin.framework.bined.gui.GoToBinaryPanel;
-import org.exbin.framework.gui.utils.LanguageUtils;
-import org.exbin.framework.gui.utils.WindowUtils;
-import org.exbin.framework.gui.utils.WindowUtils.DialogWrapper;
-import org.exbin.framework.gui.utils.handler.DefaultControlHandler;
-import org.exbin.framework.gui.utils.gui.DefaultControlPanel;
+import org.exbin.framework.bined.gui.GoToPositionPanel;
+import org.exbin.framework.utils.LanguageUtils;
+import org.exbin.framework.utils.WindowUtils;
+import org.exbin.framework.utils.WindowUtils.DialogWrapper;
+import org.exbin.framework.utils.handler.DefaultControlHandler;
+import org.exbin.framework.utils.gui.DefaultControlPanel;
 
 /**
  * Go to handler.
@@ -40,7 +40,7 @@ import org.exbin.framework.gui.utils.gui.DefaultControlPanel;
 @ParametersAreNonnullByDefault
 public class GoToPositionAction implements ActionListener {
 
-    private final ResourceBundle resourceBundle = LanguageUtils.getResourceBundleByClass(GoToBinaryPanel.class);
+    private final ResourceBundle resourceBundle = LanguageUtils.getResourceBundleByClass(GoToPositionPanel.class);
     private final ExtCodeArea codeArea;
 
     public GoToPositionAction(ExtCodeArea codeArea) {
@@ -49,18 +49,18 @@ public class GoToPositionAction implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent event) {
-        final GoToBinaryPanel goToPanel = new GoToBinaryPanel();
-        DefaultControlPanel goToControlPanel = new DefaultControlPanel(goToPanel.getResourceBundle());
-        goToPanel.setCursorPosition(codeArea.getCaretPosition().getDataPosition());
-        goToPanel.setMaxPosition(codeArea.getDataSize());
-        JPanel dialogPanel = WindowUtils.createDialogPanel(goToPanel, goToControlPanel);
+        final GoToPositionPanel goToPositionPanel = new GoToPositionPanel();
+        DefaultControlPanel goToControlPanel = new DefaultControlPanel(goToPositionPanel.getResourceBundle());
+        goToPositionPanel.setCursorPosition(codeArea.getCaretPosition().getDataPosition());
+        goToPositionPanel.setMaxPosition(codeArea.getDataSize());
+        JPanel dialogPanel = WindowUtils.createDialogPanel(goToPositionPanel, goToControlPanel);
         final DialogWrapper dialog = WindowUtils.createDialog(dialogPanel, (Component) event.getSource(), resourceBundle.getString("dialog.title"), Dialog.ModalityType.APPLICATION_MODAL);
 
-        goToPanel.initFocus();
+        goToPositionPanel.initFocus();
         goToControlPanel.setHandler((DefaultControlHandler.ControlActionType actionType) -> {
             if (actionType == DefaultControlHandler.ControlActionType.OK) {
-                goToPanel.acceptInput();
-                codeArea.setCaretPosition(goToPanel.getTargetPosition());
+                goToPositionPanel.acceptInput();
+                codeArea.setCaretPosition(goToPositionPanel.getTargetPosition());
                 PositionScrollVisibility visibility = codeArea.getPainter().computePositionScrollVisibility(codeArea.getCaretPosition());
                 if (visibility != PositionScrollVisibility.VISIBLE) {
                     codeArea.centerOnCursor();

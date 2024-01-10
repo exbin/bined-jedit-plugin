@@ -15,15 +15,17 @@
  */
 package org.exbin.framework.bined.gui;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import javax.swing.DefaultListModel;
-import org.exbin.framework.gui.utils.LanguageUtils;
-import org.exbin.framework.gui.utils.WindowUtils;
+import org.exbin.framework.utils.LanguageUtils;
+import org.exbin.framework.utils.WindowUtils;
 
 /**
  * File properties panel.
  *
  * @author ExBin Project (https://exbin.org)
  */
+@ParametersAreNonnullByDefault
 public class BinEdFilePropertiesPanel extends javax.swing.JPanel {
 
     private final java.util.ResourceBundle resourceBundle = LanguageUtils.getResourceBundleByClass(BinEdFilePropertiesPanel.class);

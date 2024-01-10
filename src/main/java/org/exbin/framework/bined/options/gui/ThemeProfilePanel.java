@@ -16,6 +16,7 @@
 package org.exbin.framework.bined.options.gui;
 
 import java.awt.BorderLayout;
+import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import javax.annotation.Nonnull;
@@ -24,8 +25,8 @@ import org.exbin.bined.extended.theme.ExtendedBackgroundPaintMode;
 import org.exbin.bined.swing.extended.ExtCodeArea;
 import org.exbin.bined.swing.extended.layout.ExtendedCodeAreaDecorations;
 import org.exbin.bined.swing.extended.theme.ExtendedCodeAreaThemeProfile;
-import org.exbin.framework.gui.utils.LanguageUtils;
-import org.exbin.framework.gui.utils.WindowUtils;
+import org.exbin.framework.utils.LanguageUtils;
+import org.exbin.framework.utils.WindowUtils;
 
 /**
  * Theme profile panel.
@@ -51,6 +52,12 @@ public class ThemeProfilePanel extends javax.swing.JPanel {
     @Nonnull
     public ResourceBundle getResourceBundle() {
         return resourceBundle;
+    }
+
+    public void setBackgroundModes(List<String> backgroundModes) {
+        for (String backgroundMode : backgroundModes) {
+            backgroundModeComboBox.addItem(backgroundMode);
+        }
     }
 
     @Nonnull
@@ -97,8 +104,6 @@ public class ThemeProfilePanel extends javax.swing.JPanel {
 
         backgroundModeLabel.setText(resourceBundle.getString("backgroundModeLabel.text")); // NOI18N
 
-        backgroundModeComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "NONE", "PLAIN", "STRIPED", "GRIDDED", "CHESSBOARD" }));
-        backgroundModeComboBox.setSelectedIndex(2);
         backgroundModeComboBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 backgroundModeComboBoxActionPerformed(evt);
@@ -220,63 +225,49 @@ public class ThemeProfilePanel extends javax.swing.JPanel {
     private void backgroundModeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backgroundModeComboBoxActionPerformed
         ExtendedBackgroundPaintMode backgroundPaintMode = ExtendedBackgroundPaintMode.values()[backgroundModeComboBox.getSelectedIndex()];
         ExtendedCodeAreaThemeProfile themeProfile = getThemeProfile();
-        if (themeProfile != null) {
-            themeProfile.setBackgroundPaintMode(backgroundPaintMode);
-        }
+        themeProfile.setBackgroundPaintMode(backgroundPaintMode);
         updateThemeProfile(themeProfile);
     }//GEN-LAST:event_backgroundModeComboBoxActionPerformed
 
     private void paintRowPosBackgroundCheckBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_paintRowPosBackgroundCheckBoxItemStateChanged
         boolean selected = paintRowPosBackgroundCheckBox.isSelected();
         ExtendedCodeAreaThemeProfile themeProfile = getThemeProfile();
-        if (themeProfile != null) {
-            themeProfile.setPaintRowPosBackground(selected);
-        }
+        themeProfile.setPaintRowPosBackground(selected);
         updateThemeProfile(themeProfile);
     }//GEN-LAST:event_paintRowPosBackgroundCheckBoxItemStateChanged
 
     private void decoratorRowPosLineCheckBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_decoratorRowPosLineCheckBoxItemStateChanged
         boolean selected = decoratorRowPosLineCheckBox.isSelected();
         ExtendedCodeAreaThemeProfile themeProfile = getThemeProfile();
-        if (themeProfile != null) {
-            themeProfile.setDecoration(ExtendedCodeAreaDecorations.ROW_POSITION_LINE, selected);
-        }
+        themeProfile.setDecoration(ExtendedCodeAreaDecorations.ROW_POSITION_LINE, selected);
         updateThemeProfile(themeProfile);
     }//GEN-LAST:event_decoratorRowPosLineCheckBoxItemStateChanged
 
     private void decoratorSplitLineCheckBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_decoratorSplitLineCheckBoxItemStateChanged
         boolean selected = decoratorSplitLineCheckBox.isSelected();
         ExtendedCodeAreaThemeProfile themeProfile = getThemeProfile();
-        if (themeProfile != null) {
-            themeProfile.setDecoration(ExtendedCodeAreaDecorations.SPLIT_LINE, selected);
-        }
+        themeProfile.setDecoration(ExtendedCodeAreaDecorations.SPLIT_LINE, selected);
         updateThemeProfile(themeProfile);
     }//GEN-LAST:event_decoratorSplitLineCheckBoxItemStateChanged
 
     private void decoratorBoxCheckBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_decoratorBoxCheckBoxItemStateChanged
         boolean selected = decoratorBoxCheckBox.isSelected();
         ExtendedCodeAreaThemeProfile themeProfile = getThemeProfile();
-        if (themeProfile != null) {
-            themeProfile.setDecoration(ExtendedCodeAreaDecorations.BOX_LINES, selected);
-        }
+        themeProfile.setDecoration(ExtendedCodeAreaDecorations.BOX_LINES, selected);
         updateThemeProfile(themeProfile);
     }//GEN-LAST:event_decoratorBoxCheckBoxItemStateChanged
 
     private void decoratorHeaderLineCheckBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_decoratorHeaderLineCheckBoxItemStateChanged
         boolean selected = decoratorHeaderLineCheckBox.isSelected();
         ExtendedCodeAreaThemeProfile themeProfile = getThemeProfile();
-        if (themeProfile != null) {
-            themeProfile.setDecoration(ExtendedCodeAreaDecorations.HEADER_LINE, selected);
-        }
+        themeProfile.setDecoration(ExtendedCodeAreaDecorations.HEADER_LINE, selected);
         updateThemeProfile(themeProfile);
     }//GEN-LAST:event_decoratorHeaderLineCheckBoxItemStateChanged
 
     private void verticalLineByteGroupSizeSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_verticalLineByteGroupSizeSpinnerStateChanged
         int byteGroupSize = (Integer) verticalLineByteGroupSizeSpinner.getValue();
         ExtendedCodeAreaThemeProfile themeProfile = getThemeProfile();
-        if (themeProfile != null) {
-            themeProfile.setVerticalLineByteGroupSize(byteGroupSize);
-        }
+        themeProfile.setVerticalLineByteGroupSize(byteGroupSize);
         updateThemeProfile(themeProfile);
     }//GEN-LAST:event_verticalLineByteGroupSizeSpinnerStateChanged
 

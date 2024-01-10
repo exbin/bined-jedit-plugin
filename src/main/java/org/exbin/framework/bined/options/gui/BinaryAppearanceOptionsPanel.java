@@ -17,18 +17,20 @@ package org.exbin.framework.bined.options.gui;
 
 import java.util.ResourceBundle;
 import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 import org.exbin.framework.bined.options.impl.BinaryAppearanceOptionsImpl;
-import org.exbin.framework.gui.utils.LanguageUtils;
-import org.exbin.framework.gui.utils.WindowUtils;
-import org.exbin.framework.gui.options.api.OptionsCapable;
-import org.exbin.framework.gui.options.api.OptionsModifiedListener;
+import org.exbin.framework.utils.LanguageUtils;
+import org.exbin.framework.utils.WindowUtils;
+import org.exbin.framework.options.api.OptionsModifiedListener;
+import org.exbin.framework.options.api.OptionsComponent;
 
 /**
  * Binary viewer/editor appearance options panel.
  *
  * @author ExBin Project (https://exbin.org)
  */
-public class BinaryAppearanceOptionsPanel extends javax.swing.JPanel implements OptionsCapable<BinaryAppearanceOptionsImpl> {
+@ParametersAreNonnullByDefault
+public class BinaryAppearanceOptionsPanel extends javax.swing.JPanel implements OptionsComponent<BinaryAppearanceOptionsImpl> {
 
     private OptionsModifiedListener optionsModifiedListener;
     private final ResourceBundle resourceBundle = LanguageUtils.getResourceBundleByClass(BinaryAppearanceOptionsPanel.class);
@@ -45,13 +47,11 @@ public class BinaryAppearanceOptionsPanel extends javax.swing.JPanel implements 
 
     @Override
     public void loadFromOptions(BinaryAppearanceOptionsImpl options) {
-        showValuesPanelCheckBox.setSelected(options.isShowValuesPanel());
         multiFileModeCheckBox.setSelected(options.isMultiFileMode());
     }
 
     @Override
     public void saveToOptions(BinaryAppearanceOptionsImpl options) {
-        options.setShowValuesPanel(showValuesPanelCheckBox.isSelected());
         options.setMultiFileMode(multiFileModeCheckBox.isSelected());
     }
 
@@ -65,7 +65,6 @@ public class BinaryAppearanceOptionsPanel extends javax.swing.JPanel implements 
     private void initComponents() {
 
         multiFileModeCheckBox = new javax.swing.JCheckBox();
-        showValuesPanelCheckBox = new javax.swing.JCheckBox();
 
         setName("Form"); // NOI18N
 
@@ -73,27 +72,19 @@ public class BinaryAppearanceOptionsPanel extends javax.swing.JPanel implements 
         multiFileModeCheckBox.setText(resourceBundle.getString("multiFileModeCheckBox.text")); // NOI18N
         multiFileModeCheckBox.setName("multiFileModeCheckBox"); // NOI18N
 
-        showValuesPanelCheckBox.setSelected(true);
-        showValuesPanelCheckBox.setText(resourceBundle.getString("showValuesPanelCheckBox.text")); // NOI18N
-        showValuesPanelCheckBox.setName("showValuesPanelCheckBox"); // NOI18N
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(showValuesPanelCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(multiFileModeCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(multiFileModeCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, 147, Short.MAX_VALUE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(showValuesPanelCheckBox)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(multiFileModeCheckBox)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -110,7 +101,6 @@ public class BinaryAppearanceOptionsPanel extends javax.swing.JPanel implements 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox multiFileModeCheckBox;
-    private javax.swing.JCheckBox showValuesPanelCheckBox;
     // End of variables declaration//GEN-END:variables
 
     private void setModified(boolean modified) {

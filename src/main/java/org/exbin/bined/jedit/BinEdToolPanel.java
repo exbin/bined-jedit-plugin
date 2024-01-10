@@ -36,12 +36,13 @@ import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JToolBar;
 import org.exbin.bined.CodeType;
-import org.exbin.bined.jedit.gui.BinEdComponentPanel;
 import org.exbin.bined.operation.BinaryDataCommand;
 import org.exbin.bined.operation.BinaryDataOperationException;
+import org.exbin.bined.operation.undo.BinaryDataUndoHandler;
 import org.exbin.bined.operation.undo.BinaryDataUndoUpdateListener;
 import org.exbin.bined.swing.extended.ExtCodeArea;
-import org.exbin.framework.gui.action.gui.DropDownButton;
+import org.exbin.framework.action.gui.DropDownButton;
+import org.exbin.framework.bined.gui.BinEdComponentPanel;
 import org.gjt.sp.jedit.GUIUtilities;
 import org.gjt.sp.jedit.gui.RolloverButton;
 import org.gjt.sp.jedit.jEdit;
@@ -61,7 +62,7 @@ public class BinEdToolPanel extends JPanel {
     private final AbstractAction showUnprintablesAction;
     private AbstractButton showUnprintablesButton;
 
-    private final AbstractAction optionsAction;
+    private AbstractAction optionsAction;
 
     private final AbstractAction cycleCodeTypesAction;
     private final JRadioButtonMenuItem binaryCodeTypeAction;
@@ -78,10 +79,9 @@ public class BinEdToolPanel extends JPanel {
     private AbstractButton pasteButton;
     private AbstractButton saveButton;
 
-    public BinEdToolPanel(BinEdEditPanel editPanel, AbstractAction optionsAction) {
+    public BinEdToolPanel(BinEdEditPanel editPanel) {
         this.editPanel = editPanel;
         componentPanel = editPanel.getComponentPanel();
-        this.optionsAction = optionsAction;
         final ExtCodeArea codeArea = componentPanel.getCodeArea();
         super.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
@@ -180,7 +180,7 @@ public class BinEdToolPanel extends JPanel {
 
         undoButton = makeCustomButton("bined.undo", (ActionEvent evt) -> {
             try {
-                componentPanel.getUndoHandler().performUndo();
+                componentPanel.getUndoHandler().get().performUndo();
             } catch (BinaryDataOperationException ex) {
                 Logger.getLogger(BinEdToolPanel.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -190,26 +190,27 @@ public class BinEdToolPanel extends JPanel {
 
         redoButton = makeCustomButton("bined.redo", (ActionEvent evt) -> {
             try {
-                componentPanel.getUndoHandler().performRedo();
+                componentPanel.getUndoHandler().get().performRedo();
             } catch (BinaryDataOperationException ex) {
                 Logger.getLogger(BinEdToolPanel.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
         redoButton.setEnabled(false);
         add(redoButton);
-        componentPanel.getUndoHandler().addUndoUpdateListener(new BinaryDataUndoUpdateListener() {
+        BinaryDataUndoHandler undoHandler = componentPanel.getUndoHandler().get();
+        undoHandler.addUndoUpdateListener(new BinaryDataUndoUpdateListener() {
             @Override
             public void undoCommandPositionChanged() {
-                saveButton.setEnabled(componentPanel.isModified());
-                undoButton.setEnabled(componentPanel.getUndoHandler().canUndo());
-                redoButton.setEnabled(componentPanel.getUndoHandler().canRedo());
+                saveButton.setEnabled(undoHandler.getCommandPosition() != undoHandler.getSyncPoint());
+                undoButton.setEnabled(undoHandler.canUndo());
+                redoButton.setEnabled(undoHandler.canRedo());
             }
 
             @Override
             public void undoCommandAdded(BinaryDataCommand bdc) {
-                saveButton.setEnabled(componentPanel.isModified());
-                undoButton.setEnabled(componentPanel.getUndoHandler().canUndo());
-                redoButton.setEnabled(componentPanel.getUndoHandler().canRedo());
+                saveButton.setEnabled(undoHandler.getCommandPosition() != undoHandler.getSyncPoint());
+                undoButton.setEnabled(undoHandler.canUndo());
+                redoButton.setEnabled(undoHandler.canRedo());
             }
         });
 

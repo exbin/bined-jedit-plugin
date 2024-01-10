@@ -18,9 +18,8 @@ package org.exbin.bined.jedit.action;
 import org.exbin.auxiliary.binary_data.BinaryData;
 import org.exbin.auxiliary.binary_data.paged.PagedData;
 import org.exbin.bined.swing.extended.ExtCodeArea;
-import org.exbin.framework.bined.gui.CompareFilesPanel;
-import org.exbin.framework.gui.utils.WindowUtils;
-import org.exbin.framework.gui.utils.gui.CloseControlPanel;
+import org.exbin.framework.utils.WindowUtils;
+import org.exbin.framework.utils.gui.CloseControlPanel;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -38,6 +37,7 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.exbin.framework.bined.compare.gui.CompareFilesPanel;
 import org.gjt.sp.jedit.GUIUtilities;
 import org.gjt.sp.jedit.View;
 
@@ -73,7 +73,7 @@ public class CompareFilesAction implements ActionListener {
 
         List<String> availableFiles = new ArrayList<>();
         availableFiles.add("Current File");
-        compareFilesPanel.setControl(new CompareFilesPanel.Control() {
+        compareFilesPanel.setController(new CompareFilesPanel.Controller() {
             @Nullable
             @Override
             public CompareFilesPanel.FileRecord openFile() {

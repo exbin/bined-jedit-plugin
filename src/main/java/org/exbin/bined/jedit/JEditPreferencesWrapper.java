@@ -73,7 +73,7 @@ public class JEditPreferencesWrapper implements Preferences {
 
     @Override
     public int getInt(String key, int def) {
-        return Integer.valueOf(jEdit.getProperty(OPTION_PREFIX + key, Integer.toString(def)));
+        return Integer.parseInt(jEdit.getProperty(OPTION_PREFIX + key, Integer.toString(def)));
     }
 
     @Override
@@ -83,7 +83,7 @@ public class JEditPreferencesWrapper implements Preferences {
 
     @Override
     public long getLong(String key, long def) {
-        return Long.valueOf(jEdit.getProperty(OPTION_PREFIX + key, Long.toString(def)));
+        return Long.parseLong(jEdit.getProperty(OPTION_PREFIX + key, Long.toString(def)));
     }
 
     @Override
@@ -93,7 +93,7 @@ public class JEditPreferencesWrapper implements Preferences {
 
     @Override
     public boolean getBoolean(String key, boolean def) {
-        return Boolean.valueOf(jEdit.getProperty(OPTION_PREFIX + key, Boolean.toString(def)));
+        return Boolean.parseBoolean(jEdit.getProperty(OPTION_PREFIX + key, Boolean.toString(def)));
     }
 
     @Override
@@ -103,7 +103,7 @@ public class JEditPreferencesWrapper implements Preferences {
 
     @Override
     public float getFloat(String key, float def) {
-        return Float.valueOf(jEdit.getProperty(OPTION_PREFIX + key, Float.toString(def)));
+        return Float.parseFloat(jEdit.getProperty(OPTION_PREFIX + key, Float.toString(def)));
     }
 
     @Override
@@ -113,7 +113,7 @@ public class JEditPreferencesWrapper implements Preferences {
 
     @Override
     public double getDouble(String key, double def) {
-        return Double.valueOf(jEdit.getProperty(OPTION_PREFIX + key, Double.toString(def)));
+        return Double.parseDouble(jEdit.getProperty(OPTION_PREFIX + key, Double.toString(def)));
     }
 
     @Override

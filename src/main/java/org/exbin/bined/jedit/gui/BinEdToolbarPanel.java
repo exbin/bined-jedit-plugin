@@ -28,8 +28,8 @@ import org.exbin.bined.CodeType;
 import org.exbin.bined.operation.undo.BinaryDataUndoHandler;
 import org.exbin.bined.swing.extended.ExtCodeArea;
 import org.exbin.framework.bined.preferences.BinaryEditorPreferences;
-import org.exbin.framework.gui.action.gui.DropDownButton;
-import org.exbin.framework.gui.utils.LanguageUtils;
+import org.exbin.framework.action.gui.DropDownButton;
+import org.exbin.framework.utils.LanguageUtils;
 
 /**
  * Binary editor toolbar panel.
@@ -43,7 +43,7 @@ public class BinEdToolbarPanel extends javax.swing.JPanel {
 
     private final BinaryEditorPreferences preferences;
     private final ExtCodeArea codeArea;
-    private final AbstractAction optionsAction;
+    private AbstractAction optionsAction;
 
     private final AbstractAction cycleCodeTypesAction;
     private final JRadioButtonMenuItem binaryCodeTypeAction;
@@ -54,10 +54,9 @@ public class BinEdToolbarPanel extends javax.swing.JPanel {
     private DropDownButton codeTypeDropDown;
 
 //    private JSplitButton codeTypeButton;
-    public BinEdToolbarPanel(BinaryEditorPreferences preferences, ExtCodeArea codeArea, AbstractAction optionsAction) {
+    public BinEdToolbarPanel(BinaryEditorPreferences preferences, ExtCodeArea codeArea) {
         this.preferences = preferences;
         this.codeArea = codeArea;
-        this.optionsAction = optionsAction;
 
         codeTypeButtonGroup = new ButtonGroup();
         binaryCodeTypeAction = new JRadioButtonMenuItem(new AbstractAction("Binary") {
@@ -137,6 +136,10 @@ public class BinEdToolbarPanel extends javax.swing.JPanel {
 
     public void setUndoHandler(BinaryDataUndoHandler undoHandler) {
         // ignore in this toolbar
+    }
+
+    public void setOptionsAction(AbstractAction optionsAction) {
+        this.optionsAction = optionsAction;
     }
 
     private void updateCycleButtonState() {

@@ -93,6 +93,7 @@ dependencies {
     implementation ":binary_data-${binaryDataVersion}"
     implementation ":binary_data-paged-${binaryDataVersion}"
     implementation ":binary_data-delta-${binaryDataVersion}"
+    implementation group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.70'
     implementation ':jsr305-3.0.2'
     testImplementation group : 'junit', name: 'junit', version: '4.13.2'
 }

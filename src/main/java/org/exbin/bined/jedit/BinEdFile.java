@@ -37,11 +37,11 @@ import org.exbin.auxiliary.binary_data.delta.DeltaDocument;
 import org.exbin.auxiliary.binary_data.delta.FileDataSource;
 import org.exbin.auxiliary.binary_data.delta.SegmentsRepository;
 import org.exbin.bined.EditMode;
-import org.exbin.bined.jedit.gui.BinEdComponentFileApi;
-import org.exbin.bined.jedit.gui.BinEdComponentPanel;
-import org.exbin.bined.operation.swing.CodeAreaUndoHandler;
 import org.exbin.bined.swing.extended.ExtCodeArea;
+import org.exbin.framework.bined.BinEdFileHandler;
 import org.exbin.framework.bined.FileHandlingMode;
+import org.exbin.framework.bined.gui.BinEdComponentFileApi;
+import org.exbin.framework.bined.gui.BinEdComponentPanel;
 import org.gjt.sp.jedit.View;
 
 /**
@@ -58,20 +58,18 @@ public class BinEdFile implements BinEdComponentFileApi {
 
     private static SegmentsRepository segmentsRepository = null;
 
-    private final BinEdComponentPanel componentPanel;
+    private final BinEdFileHandler fileHandler;
 
     private File file;
 
     public BinEdFile() {
-        componentPanel = new BinEdComponentPanel();
-        ExtCodeArea codeArea = componentPanel.getCodeArea();
-        CodeAreaUndoHandler undoHandler = new CodeAreaUndoHandler(codeArea);
-        componentPanel.setFileApi(this);
-        componentPanel.setUndoHandler(undoHandler);
+        fileHandler = new BinEdFileHandler();
+        ExtCodeArea codeArea = fileHandler.getCodeArea();
 
         getSegmentsRepository();
 
-        ActionMap actionMap = componentPanel.getActionMap();
+        BinEdComponentPanel component = fileHandler.getComponent();
+        ActionMap actionMap = component.getActionMap();
         actionMap.put(ACTION_CLIPBOARD_COPY, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -93,20 +91,21 @@ public class BinEdFile implements BinEdComponentFileApi {
     }
 
     public boolean isModified() {
-        return componentPanel.isModified();
+        return fileHandler.isModified();
     }
 
     public boolean releaseFile() {
-        return componentPanel.releaseFile();
+        throw new UnsupportedOperationException("Not supported yet.");
+        // return fileHandler.releaseFile();
     }
 
     @Nonnull
     public BinEdComponentPanel getPanel() {
-        return componentPanel;
+        return fileHandler.getComponent();
     }
 
     public void setView(View view) {
-        componentPanel.setView(view);
+        // fileHandler.setView(view);
     }
 
     @Nonnull
@@ -120,7 +119,7 @@ public class BinEdFile implements BinEdComponentFileApi {
 
     public void openFile(File file) {
         this.file = file;
-        ExtCodeArea codeArea = componentPanel.getCodeArea();
+        ExtCodeArea codeArea = fileHandler.getCodeArea();
         boolean editable = file.canWrite();
         codeArea.setEditMode(editable ? EditMode.EXPANDING : EditMode.READ_ONLY);
         if (file.isFile() && file.exists()) {
@@ -133,18 +132,18 @@ public class BinEdFile implements BinEdComponentFileApi {
             closeData();
         }
         // updateModified();
-        componentPanel.getUndoHandler().clear();
+        fileHandler.getUndoHandler().clear();
     }
 
     public void openDocument(File file, boolean editable) throws IOException {
-        ExtCodeArea codeArea = componentPanel.getCodeArea();
-        FileHandlingMode fileHandlingMode = componentPanel.getFileHandlingMode();
+        ExtCodeArea codeArea = fileHandler.getCodeArea();
+        FileHandlingMode fileHandlingMode = fileHandler.getFileHandlingMode();
 
         BinaryData oldData = codeArea.getContentData();
         if (fileHandlingMode == FileHandlingMode.DELTA) {
             FileDataSource fileSource = segmentsRepository.openFileSource(file, editable ? FileDataSource.EditMode.READ_WRITE : FileDataSource.EditMode.READ_ONLY);
             DeltaDocument document = segmentsRepository.createDocument(fileSource);
-            componentPanel.setContentData(document);
+            fileHandler.getCodeArea().setContentData(document);
             if (oldData != null) {
                 oldData.dispose();
             }
@@ -158,23 +157,23 @@ public class BinEdFile implements BinEdComponentFileApi {
                     }
                 }
                 ((EditableBinaryData) data).loadFromStream(fileStream);
-                componentPanel.setContentData(data);
+                fileHandler.getCodeArea().setContentData(data);
             }
         }
         codeArea.setEditMode(editable ? EditMode.EXPANDING : EditMode.READ_ONLY);
     }
 
     public void openDocument(InputStream stream, boolean editable) throws IOException {
-        ExtCodeArea codeArea = componentPanel.getCodeArea();
+        ExtCodeArea codeArea = fileHandler.getCodeArea();
         setNewData();
         EditableBinaryData data = Objects.requireNonNull((EditableBinaryData) codeArea.getContentData());
         data.loadFromStream(stream);
         codeArea.setEditMode(editable ? EditMode.EXPANDING : EditMode.READ_ONLY);
-        componentPanel.setContentData(data);
+        fileHandler.getCodeArea().setContentData(data);
     }
 
     public void saveFile() {
-        ExtCodeArea codeArea = componentPanel.getCodeArea();
+        ExtCodeArea codeArea = fileHandler.getCodeArea();
         BinaryData contentData = codeArea.getContentData();
         if (contentData instanceof DeltaDocument) {
             try {
@@ -207,7 +206,7 @@ public class BinEdFile implements BinEdComponentFileApi {
     public void saveToFile(File targetFile) {
         try {
             file = targetFile;
-            ExtCodeArea codeArea = componentPanel.getCodeArea();
+            ExtCodeArea codeArea = fileHandler.getCodeArea();
             BinaryData contentData = codeArea.getContentData();
             if (contentData instanceof DeltaDocument) {
                 DeltaDocument document = (DeltaDocument) contentData;
@@ -225,9 +224,9 @@ public class BinEdFile implements BinEdComponentFileApi {
 
     @Override
     public void closeData() {
-        ExtCodeArea codeArea = componentPanel.getCodeArea();
+        ExtCodeArea codeArea = fileHandler.getCodeArea();
         BinaryData data = codeArea.getContentData();
-        componentPanel.setContentData(new ByteArrayData());
+        fileHandler.getCodeArea().setContentData(new ByteArrayData());
         if (data instanceof DeltaDocument) {
             FileDataSource fileSource = ((DeltaDocument) data).getFileSource();
             data.dispose();
@@ -242,14 +241,14 @@ public class BinEdFile implements BinEdComponentFileApi {
 
     public void newFile() {
         closeData();
-        ExtCodeArea codeArea = componentPanel.getCodeArea();
+        ExtCodeArea codeArea = fileHandler.getCodeArea();
         BinaryData data = codeArea.getContentData();
         if (data instanceof DeltaDocument) {
             segmentsRepository.dropDocument(Objects.requireNonNull((DeltaDocument) codeArea.getContentData()));
         }
         setNewData();
         file = null;
-        componentPanel.getUndoHandler().clear();
+        fileHandler.getUndoHandler().clear();
     }
 
     @Override
@@ -263,8 +262,8 @@ public class BinEdFile implements BinEdComponentFileApi {
 
     @Override
     public void switchFileHandlingMode(FileHandlingMode newHandlingMode) {
-        FileHandlingMode fileHandlingMode = componentPanel.getFileHandlingMode();
-        ExtCodeArea codeArea = componentPanel.getCodeArea();
+        FileHandlingMode fileHandlingMode = fileHandler.getFileHandlingMode();
+        ExtCodeArea codeArea = fileHandler.getCodeArea();
         if (newHandlingMode != fileHandlingMode) {
             // Switch memory mode
             if (file != null) {
@@ -274,10 +273,10 @@ public class BinEdFile implements BinEdComponentFileApi {
                         openFile(file);
                         codeArea.clearSelection();
                         codeArea.setCaretPosition(0);
-                        componentPanel.setFileHandlingMode(newHandlingMode);
+                        fileHandler.switchFileHandlingMode(newHandlingMode);
                     }
                 } else {
-                    componentPanel.setFileHandlingMode(newHandlingMode);
+                    fileHandler.switchFileHandlingMode(newHandlingMode);
                     openFile(file);
                 }
             } else {
@@ -286,7 +285,7 @@ public class BinEdFile implements BinEdComponentFileApi {
                     BinaryData oldData = codeArea.getContentData();
                     PagedData data = new PagedData();
                     data.insert(0, codeArea.getContentData());
-                    componentPanel.setContentData(data);
+                    fileHandler.getCodeArea().setContentData(data);
                     if (oldData != null) {
                         oldData.dispose();
                     }
@@ -297,11 +296,11 @@ public class BinEdFile implements BinEdComponentFileApi {
                         document.insert(0, oldData);
                         oldData.dispose();
                     }
-                    componentPanel.setContentData(document);
+                    fileHandler.getCodeArea().setContentData(document);
                 }
 
-                componentPanel.getUndoHandler().clear();
-                componentPanel.setFileHandlingMode(newHandlingMode);
+                fileHandler.getUndoHandler().clear();
+                fileHandler.switchFileHandlingMode(newHandlingMode);
             }
         }
     }
@@ -312,19 +311,15 @@ public class BinEdFile implements BinEdComponentFileApi {
     }
 
     private void setNewData() {
-        FileHandlingMode fileHandlingMode = componentPanel.getFileHandlingMode();
+        FileHandlingMode fileHandlingMode = fileHandler.getFileHandlingMode();
         if (fileHandlingMode == FileHandlingMode.DELTA) {
-            componentPanel.setContentData(segmentsRepository.createDocument());
+            fileHandler.getCodeArea().setContentData(segmentsRepository.createDocument());
         } else {
-            componentPanel.setContentData(new PagedData());
+            fileHandler.getCodeArea().setContentData(new PagedData());
         }
     }
 
-    public void setModifiedChangeListener(BinEdComponentPanel.ModifiedStateListener modifiedChangeListener) {
-        componentPanel.setModifiedChangeListener(modifiedChangeListener);
-    }
-
     public void requestFocus() {
-        componentPanel.getCodeArea().requestFocus();
+        fileHandler.getCodeArea().requestFocus();
     }
 }

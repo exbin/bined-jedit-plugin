@@ -24,7 +24,7 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import org.exbin.framework.editor.text.options.TextFontOptions;
 import org.exbin.framework.editor.text.preferences.TextFontPreferences;
-import org.exbin.framework.gui.options.api.OptionsData;
+import org.exbin.framework.options.api.OptionsData;
 
 /**
  * Text font options.
@@ -36,7 +36,7 @@ public class TextFontOptionsImpl implements TextFontOptions, OptionsData {
 
     private boolean useDefaultFont = true;
     @Nullable
-    private Map<TextAttribute, Object> fontAttributes = null;
+    private Map<TextAttribute, ?> fontAttributes = null;
 
     @Override
     public boolean isUseDefaultFont() {
@@ -50,12 +50,12 @@ public class TextFontOptionsImpl implements TextFontOptions, OptionsData {
 
     @Nullable
     @Override
-    public Map<TextAttribute, Object> getFontAttributes() {
+    public Map<TextAttribute, ?> getFontAttributes() {
         return fontAttributes;
     }
 
     @Override
-    public void setFontAttributes(@Nullable Map<TextAttribute, Object> fontAttributes) {
+    public void setFontAttributes(@Nullable Map<TextAttribute, ?> fontAttributes) {
         this.fontAttributes = fontAttributes;
     }
 
@@ -69,16 +69,17 @@ public class TextFontOptionsImpl implements TextFontOptions, OptionsData {
         preferences.setFontAttributes(fontAttributes);
     }
 
+    @SuppressWarnings("unchecked")
     public void setOptions(TextFontOptionsImpl options) {
         useDefaultFont = options.useDefaultFont;
         fontAttributes = new HashMap<>();
-        fontAttributes.putAll(options.fontAttributes);
+        ((Map) fontAttributes).putAll(options.fontAttributes);
     }
 
     @Nonnull
     @Override
     public Font getFont(Font initialFont) {
-        Map<TextAttribute, Object> attribs = getFontAttributes();
+        Map<TextAttribute, ?> attribs = getFontAttributes();
         Font font = initialFont.deriveFont(attribs);
         return font;
     }
