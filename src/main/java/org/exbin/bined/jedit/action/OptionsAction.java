@@ -18,7 +18,6 @@ package org.exbin.bined.jedit.action;
 import org.exbin.bined.jedit.gui.BinEdOptionsPanel;
 import org.exbin.bined.jedit.gui.BinEdOptionsPanelBorder;
 import org.exbin.bined.swing.extended.ExtCodeArea;
-import org.exbin.framework.bined.gui.BinEdComponentFileApi;
 import org.exbin.framework.bined.preferences.BinaryEditorPreferences;
 import org.exbin.framework.editor.text.service.TextFontService;
 import org.exbin.framework.utils.WindowUtils;
@@ -33,7 +32,9 @@ import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
-import org.exbin.framework.bined.BinEdEditorComponent;
+import org.exbin.framework.bined.BinEdFileHandler;
+import org.exbin.framework.bined.BinedOptionsManager;
+import org.exbin.framework.bined.gui.BinEdComponentPanel;
 
 /**
  * Options action.
@@ -43,20 +44,21 @@ import org.exbin.framework.bined.BinEdEditorComponent;
 @ParametersAreNonnullByDefault
 public class OptionsAction extends AbstractAction {
 
-    private final BinEdEditorComponent editorComponent;
+    private final BinEdFileHandler fileHandler;
     private final BinaryEditorPreferences preferences;
 
-    public OptionsAction(BinEdEditorComponent editorComponent, BinaryEditorPreferences preferences) {
-        this.editorComponent = editorComponent;
+    public OptionsAction(BinEdFileHandler fileHandler, BinaryEditorPreferences preferences) {
+        this.fileHandler = fileHandler;
         this.preferences = preferences;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-/*        ExtCodeArea codeArea = editorComponent.getCodeArea();
-        BinEdComponentFileApi fileApi = editorComponent.getFileApi();
+        ExtCodeArea codeArea = fileHandler.getCodeArea();
         final BinEdOptionsPanelBorder optionsPanelWrapper = new BinEdOptionsPanelBorder();
         optionsPanelWrapper.setPreferredSize(new Dimension(700, 460));
+//        BinedOptionsManager optionsManager = new BinedOptionsManager();
+//        optionsManager.
         BinEdOptionsPanel optionsPanel = optionsPanelWrapper.getOptionsPanel();
         optionsPanel.setPreferences(preferences);
         optionsPanel.setTextFontService(new TextFontService() {
@@ -69,7 +71,7 @@ public class OptionsAction extends AbstractAction {
             @Nonnull
             @Override
             public Font getDefaultFont() {
-                return editorComponent.getDefaultFont();
+                return fileHandler.getDefaultFont();
             }
 
             @Override
@@ -77,26 +79,26 @@ public class OptionsAction extends AbstractAction {
                 codeArea.setCodeFont(font);
             }
         });
+        BinEdComponentPanel componentPanel = fileHandler.getComponent();
         optionsPanel.loadFromPreferences();
-        editorComponent.updateApplyOptions(optionsPanel);
+//        editorPanel.updateApplyOptions(optionsPanel);
         OptionsControlPanel optionsControlPanel = new OptionsControlPanel();
         JPanel dialogPanel = WindowUtils.createDialogPanel(optionsPanelWrapper, optionsControlPanel);
-        WindowUtils.DialogWrapper dialog = WindowUtils.createDialog(dialogPanel, editorComponent.getComponentPanel(), "Options", Dialog.ModalityType.APPLICATION_MODAL);
+        WindowUtils.DialogWrapper dialog = WindowUtils.createDialog(dialogPanel, componentPanel, "Options", Dialog.ModalityType.APPLICATION_MODAL);
         optionsControlPanel.setHandler((OptionsControlHandler.ControlActionType actionType) -> {
             if (actionType != OptionsControlHandler.ControlActionType.CANCEL) {
                 optionsPanel.applyToOptions();
                 if (actionType == OptionsControlHandler.ControlActionType.SAVE) {
                     optionsPanel.saveToPreferences();
                 }
-                editorComponent.applyOptions(optionsPanel);
-                Installer.applyIntegrationOptions(optionsPanel.getIntegrationOptions());
-                fileApi.switchFileHandlingMode(optionsPanel.getEditorOptions().getFileHandlingMode());
+//                editorPanel.applyOptions(optionsPanel);
+                fileHandler.switchFileHandlingMode(optionsPanel.getEditorOptions().getFileHandlingMode());
                 codeArea.repaint();
             }
 
             dialog.close();
         });
-        dialog.showCentered(editorComponent.getComponentPanel());
-        dialog.dispose(); */
+        dialog.showCentered(componentPanel);
+        dialog.dispose();
     }
 }

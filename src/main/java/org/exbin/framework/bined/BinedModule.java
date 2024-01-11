@@ -21,8 +21,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.swing.JPopupMenu;
 import org.exbin.bined.basic.BasicCodeAreaZone;
+import org.exbin.bined.jedit.main.BinEdManager;
 import org.exbin.bined.swing.extended.ExtCodeArea;
-import org.exbin.framework.api.XBApplication;
 import org.exbin.framework.api.XBApplicationModule;
 import org.exbin.framework.bined.action.CodeAreaAction;
 import org.exbin.framework.bined.handler.CodeAreaPopupMenuHandler;
@@ -35,7 +35,6 @@ import org.exbin.framework.bined.handler.CodeAreaPopupMenuHandler;
 @ParametersAreNonnullByDefault
 public class BinedModule implements XBApplicationModule {
 
-    private BinEdFileManager fileManager = new BinEdFileManager();
     private PopupMenuVariant popupMenuVariant = PopupMenuVariant.NORMAL;
     private BasicCodeAreaZone popupMenuPositionZone = BasicCodeAreaZone.UNKNOWN;
 
@@ -44,13 +43,10 @@ public class BinedModule implements XBApplicationModule {
     public BinedModule() {
     }
 
-    public void setApplication(XBApplication application) {
-        fileManager.setApplication(application);
-    }
-
     @Nonnull
     public BinEdFileManager getFileManager() {
-        return fileManager;
+        BinEdManager binEdManager = BinEdManager.getInstance();
+        return binEdManager.getFileManager();
     }
 
     @Nonnull

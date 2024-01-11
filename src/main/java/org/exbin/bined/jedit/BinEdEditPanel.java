@@ -23,6 +23,7 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.swing.JPanel;
 import org.exbin.bined.jedit.action.OptionsAction;
+import org.exbin.framework.bined.BinEdFileHandler;
 import org.exbin.framework.bined.gui.BinEdComponentPanel;
 import org.gjt.sp.jedit.EBComponent;
 import org.gjt.sp.jedit.EBMessage;
@@ -115,5 +116,10 @@ public class BinEdEditPanel extends JPanel implements EBComponent, BinEdActions,
     @Nonnull
     public BinEdComponentPanel getComponentPanel() {
         return (BinEdComponentPanel) editorFile.getPanel();
+    }
+
+    @Nonnull
+    public BinEdFileHandler getFileHandler() {
+        return editorFile.getFileHandler();
     }
 }

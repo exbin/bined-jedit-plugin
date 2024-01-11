@@ -51,6 +51,7 @@ public class BinEdToolbarPanel extends javax.swing.JPanel {
     private final JRadioButtonMenuItem decimalCodeTypeAction;
     private final JRadioButtonMenuItem hexadecimalCodeTypeAction;
     private final ButtonGroup codeTypeButtonGroup;
+    private JButton optionsButton;
     private DropDownButton codeTypeDropDown;
 
 //    private JSplitButton codeTypeButton;
@@ -126,9 +127,8 @@ public class BinEdToolbarPanel extends javax.swing.JPanel {
 //        controlToolBar.add(codeTypeButton);
 
         controlToolBar.addSeparator();
-        JButton optionsButton = new JButton();
+        optionsButton = new JButton();
         optionsButton.setToolTipText("Options");
-        optionsButton.setAction(optionsAction);
         optionsButton.setIcon(new ImageIcon(getClass().getResource("/org/exbin/framework/gui/options/resources/icons/Preferences16.gif")));
         controlToolBar.add(optionsButton);
 
@@ -140,6 +140,7 @@ public class BinEdToolbarPanel extends javax.swing.JPanel {
 
     public void setOptionsAction(AbstractAction optionsAction) {
         this.optionsAction = optionsAction;
+        optionsButton.setAction(optionsAction);
     }
 
     private void updateCycleButtonState() {

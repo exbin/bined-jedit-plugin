@@ -37,8 +37,10 @@ import org.exbin.auxiliary.binary_data.delta.DeltaDocument;
 import org.exbin.auxiliary.binary_data.delta.FileDataSource;
 import org.exbin.auxiliary.binary_data.delta.SegmentsRepository;
 import org.exbin.bined.EditMode;
+import org.exbin.bined.jedit.main.BinEdManager;
 import org.exbin.bined.swing.extended.ExtCodeArea;
 import org.exbin.framework.bined.BinEdFileHandler;
+import org.exbin.framework.bined.BinEdFileManager;
 import org.exbin.framework.bined.FileHandlingMode;
 import org.exbin.framework.bined.gui.BinEdComponentFileApi;
 import org.exbin.framework.bined.gui.BinEdComponentPanel;
@@ -63,7 +65,10 @@ public class BinEdFile implements BinEdComponentFileApi {
     private File file;
 
     public BinEdFile() {
+        BinEdManager binEdManager = BinEdManager.getInstance();
         fileHandler = new BinEdFileHandler();
+        BinEdFileManager fileManager = binEdManager.getFileManager();
+        fileManager.initFileHandler(fileHandler);
         ExtCodeArea codeArea = fileHandler.getCodeArea();
 
         getSegmentsRepository();
@@ -102,6 +107,11 @@ public class BinEdFile implements BinEdComponentFileApi {
     @Nonnull
     public BinEdComponentPanel getPanel() {
         return fileHandler.getComponent();
+    }
+
+    @Nonnull
+    public BinEdFileHandler getFileHandler() {
+        return fileHandler;
     }
 
     public void setView(View view) {

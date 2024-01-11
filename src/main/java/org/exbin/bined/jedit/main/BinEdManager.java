@@ -95,6 +95,7 @@ public class BinEdManager {
 
     private BinEdManager() {
         preferences = new BinaryEditorPreferences(application.getAppPreferences());
+        fileManager.setApplication(application);
     }
 
     @Nonnull
@@ -107,16 +108,14 @@ public class BinEdManager {
     }
 
     @Nonnull
-    public BinEdEditorComponent createBinEdEditor() {
+    public void initFileHandler(BinEdFileHandler fileHandler) {
         if (!initialized) {
             initialized = true;
             new BookmarksManager().init();
             // TODO new BinEdInspectorManager().init();
         }
 
-        BinEdEditorComponent binEdEditorComponent = new BinEdEditorComponent();
-        binEdEditorComponent.onInitFromPreferences(preferences);
-        BinEdComponentPanel componentPanel = binEdEditorComponent.getComponentPanel();
+        BinEdComponentPanel componentPanel = fileHandler.getComponent();
         ExtCodeArea codeArea = componentPanel.getCodeArea();
 
         codeArea.setComponentPopupMenu(new JPopupMenu() {
@@ -129,7 +128,7 @@ public class BinEdManager {
                     clickedY += invoker.getParent().getY();
                 }
                 removeAll();
-// TODO                createContextMenu(binEdEditorComponent.getCodeArea(), binEdEditorComponent.getFileApi(), binEdEditorComponent, this, PopupMenuVariant.EDITOR, clickedX, clickedY);
+                createContextMenu(componentPanel.getCodeArea(), fileHandler, this, PopupMenuVariant.EDITOR, clickedX, clickedY);
                 super.show(invoker, x, y);
             }
         });
@@ -198,8 +197,6 @@ public class BinEdManager {
         goToPositionAction.setup(application, resourceBundle);
         goToPositionAction.updateForActiveCodeArea(codeArea);
         // TODO binEdEditorComponent.setGoToPositionAction(goToPositionAction);
-
-        return binEdEditorComponent;
     }
 
     @Nonnull
@@ -207,11 +204,7 @@ public class BinEdManager {
         return fileManager;
     }
 
-    public void createContextMenu(ExtCodeArea codeArea, final JPopupMenu menu, PopupMenuVariant variant, int x, int y) {
-        createContextMenu(codeArea, null, null, menu, variant, x, y);
-    }
-
-    public void createContextMenu(ExtCodeArea codeArea, @Nullable BinEdComponentFileApi fileApi, @Nullable BinEdEditorComponent editorComponent, final JPopupMenu menu, PopupMenuVariant variant, int x, int y) {
+    public void createContextMenu(ExtCodeArea codeArea, BinEdFileHandler fileHandler, final JPopupMenu menu, PopupMenuVariant variant, int x, int y) {
         BasicCodeAreaZone positionZone = codeArea.getPainter().getPositionZone(x, y);
 
         if (variant == PopupMenuVariant.EDITOR) {
@@ -225,7 +218,7 @@ public class BinEdManager {
                     JMenu showMenu = new JMenu("Show");
                     showMenu.add(createShowHeaderMenuItem(codeArea));
                     showMenu.add(createShowRowPositionMenuItem(codeArea));
-                    showMenu.add(createShowInspectorPanel(editorComponent.getComponentPanel()));
+                    showMenu.add(createShowInspectorPanel(fileHandler.getComponent()));
                     menu.add(showMenu);
                     menu.addSeparator();
                 }
@@ -363,15 +356,15 @@ public class BinEdManager {
 
         menu.addSeparator();
 
-        if (editorComponent != null) {
-            JMenuItem insertDataMenuItem = createInsertDataMenuItem(editorComponent);
-            insertDataMenuItem.setEnabled(codeArea.isEditable());
-            menu.add(insertDataMenuItem);
-            JMenuItem convertDataMenuItem = createConvertDataMenuItem(editorComponent);
-            convertDataMenuItem.setEnabled(codeArea.isEditable());
-            menu.add(convertDataMenuItem);
-            menu.addSeparator();
-        }
+//        if (editorComponent != null) {
+//            JMenuItem insertDataMenuItem = createInsertDataMenuItem(editorComponent);
+//            insertDataMenuItem.setEnabled(codeArea.isEditable());
+//            menu.add(insertDataMenuItem);
+//            JMenuItem convertDataMenuItem = createConvertDataMenuItem(editorComponent);
+//            convertDataMenuItem.setEnabled(codeArea.isEditable());
+//            menu.add(convertDataMenuItem);
+//            menu.addSeparator();
+//        }
 
         JMenu toolsMenu = new JMenu("Tools");
         toolsMenu.add(createCompareFilesMenuItem(codeArea));
@@ -379,20 +372,18 @@ public class BinEdManager {
         toolsMenu.add(createDragDropContentMenuItem());
         menu.add(toolsMenu);
 
-        if (editorComponent != null) {
-            if (fileApi instanceof BinEdFileHandler) {
-                JMenuItem reloadFileMenuItem = createReloadFileMenuItem(editorComponent);
-                menu.add(reloadFileMenuItem);
-            }
-        }
+//        if (editorComponent != null) {
+//            if (fileHandler instanceof BinEdFileHandler) {
+//                JMenuItem reloadFileMenuItem = createReloadFileMenuItem(editorComponent);
+//                menu.add(reloadFileMenuItem);
+//            }
+//        }
 
-        if (editorComponent != null) {
-            final JMenuItem optionsMenuItem = new JMenuItem("Options...");
-            optionsMenuItem.setIcon(new ImageIcon(getClass().getResource(
-                    "/org/exbin/framework/options/gui/resources/icons/Preferences16.gif")));
-            optionsMenuItem.addActionListener(createOptionsAction(editorComponent));
-            menu.add(optionsMenuItem);
-        }
+        final JMenuItem optionsMenuItem = new JMenuItem("Options...");
+        optionsMenuItem.setIcon(new ImageIcon(getClass().getResource(
+                "/org/exbin/framework/options/gui/resources/icons/Preferences16.gif")));
+        optionsMenuItem.addActionListener(createOptionsAction(fileHandler));
+        menu.add(optionsMenuItem);
 
         switch (positionZone) {
             case TOP_LEFT_CORNER:
@@ -427,8 +418,8 @@ public class BinEdManager {
     }
 
     @Nonnull
-    private AbstractAction createOptionsAction(BinEdEditorComponent editorComponent) {
-        return new OptionsAction(editorComponent, preferences);
+    private AbstractAction createOptionsAction(BinEdFileHandler fileHandler) {
+        return new OptionsAction(fileHandler, preferences);
     }
 
     @Nonnull

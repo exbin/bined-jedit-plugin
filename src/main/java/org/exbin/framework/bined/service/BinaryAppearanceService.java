@@ -38,11 +38,4 @@ public interface BinaryAppearanceService {
      * @param mode word wrapping mode
      */
     void setWordWrapMode(boolean mode);
-
-    /**
-     * Sets values panel visibility.
-     *
-     * @param showValuesPanel
-     */
-    void setShowValuesPanel(boolean showValuesPanel);
 }
