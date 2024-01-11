@@ -114,6 +114,62 @@ public class BinEdOptionsPanel extends javax.swing.JPanel implements BinEdApplyO
     public BinEdOptionsPanel() {
         initComponents();
 
+        List<String> fileHandlingModes = new ArrayList<>();
+        fileHandlingModes.add(resourceBundle.getString("fileHandlingMode.memory"));
+        fileHandlingModes.add(resourceBundle.getString("fileHandlingMode.delta"));
+        editorOptionsPanel.setFileHandlingModes(fileHandlingModes);
+        List<String> enderKeyHandlingModes = new ArrayList<>();
+        enderKeyHandlingModes.add(resourceBundle.getString("enterKeyHandlingMode.platformSpecific"));
+        enderKeyHandlingModes.add(resourceBundle.getString("enterKeyHandlingMode.cr"));
+        enderKeyHandlingModes.add(resourceBundle.getString("enterKeyHandlingMode.lf"));
+        enderKeyHandlingModes.add(resourceBundle.getString("enterKeyHandlingMode.crlf"));
+        enderKeyHandlingModes.add(resourceBundle.getString("enterKeyHandlingMode.ignore"));
+        editorOptionsPanel.setEnterKeyHandlingModes(enderKeyHandlingModes);
+        List<String> tabKeyHandlingModes = new ArrayList<>();
+        tabKeyHandlingModes.add(resourceBundle.getString("tabKeyHandlingMode.platformSpecific"));
+        tabKeyHandlingModes.add(resourceBundle.getString("tabKeyHandlingMode.insertTab"));
+        tabKeyHandlingModes.add(resourceBundle.getString("tabKeyHandlingMode.insertSpaces"));
+        tabKeyHandlingModes.add(resourceBundle.getString("tabKeyHandlingMode.cycleToNextSection"));
+        tabKeyHandlingModes.add(resourceBundle.getString("tabKeyHandlingMode.cycleToPreviousSection"));
+        tabKeyHandlingModes.add(resourceBundle.getString("tabKeyHandlingMode.ignore"));
+        editorOptionsPanel.setTabKeyHandlingModes(tabKeyHandlingModes);
+
+        List<String> viewModes = new ArrayList<>();
+        viewModes.add(resourceBundle.getString("codeAreaViewMode.dual"));
+        viewModes.add(resourceBundle.getString("codeAreaViewMode.codeMatrix"));
+        viewModes.add(resourceBundle.getString("codeAreaViewMode.textPreview"));
+        codeAreaOptionsPanel.setViewModes(viewModes);
+
+        List<String> codeTypes = new ArrayList<>();
+        codeTypes.add(resourceBundle.getString("codeAreaCodeType.binary"));
+        codeTypes.add(resourceBundle.getString("codeAreaCodeType.octal"));
+        codeTypes.add(resourceBundle.getString("codeAreaCodeType.decimal"));
+        codeTypes.add(resourceBundle.getString("codeAreaCodeType.hexadecimal"));
+        codeAreaOptionsPanel.setCodeTypes(codeTypes);
+
+        List<String> positionCodeTypes = new ArrayList<>();
+        positionCodeTypes.add(resourceBundle.getString("positionCodeAreaCodeType.octal"));
+        positionCodeTypes.add(resourceBundle.getString("positionCodeAreaCodeType.decimal"));
+        positionCodeTypes.add(resourceBundle.getString("positionCodeAreaCodeType.hexadecimal"));
+        codeAreaOptionsPanel.setPositionCodeTypes(positionCodeTypes);
+
+        List<String> charactersCases = new ArrayList<>();
+        charactersCases.add(resourceBundle.getString("codeAreaCharactersCase.lower"));
+        charactersCases.add(resourceBundle.getString("codeAreaCharactersCase.higher"));
+        codeAreaOptionsPanel.setCharactersCases(charactersCases);
+
+        List<String> cursorPositionCodeTypes = new ArrayList<>();
+        cursorPositionCodeTypes.add(resourceBundle.getString("cursorPositionCodeType.octal"));
+        cursorPositionCodeTypes.add(resourceBundle.getString("cursorPositionCodeType.decimal"));
+        cursorPositionCodeTypes.add(resourceBundle.getString("cursorPositionCodeType.hexadecimal"));
+        statusOptionsPanel.setCursorPositionCodeTypes(cursorPositionCodeTypes);
+
+        List<String> documentSizeCodeTypes = new ArrayList<>();
+        documentSizeCodeTypes.add(resourceBundle.getString("documentSizeCodeType.octal"));
+        documentSizeCodeTypes.add(resourceBundle.getString("documentSizeCodeType.decimal"));
+        documentSizeCodeTypes.add(resourceBundle.getString("documentSizeCodeType.hexadecimal"));
+        statusOptionsPanel.setDocumentSizeCodeTypes(documentSizeCodeTypes);
+
         categoryModel.addElement(new CategoryItem("Editor", editorOptionsPanel));
         categoryModel.addElement(new CategoryItem("Status Panel", statusOptionsPanel));
         categoryModel.addElement(new CategoryItem("Code Area", codeAreaOptionsPanel));

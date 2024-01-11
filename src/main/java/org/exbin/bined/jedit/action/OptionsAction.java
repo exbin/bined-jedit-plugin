@@ -33,7 +33,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import org.exbin.framework.bined.BinEdFileHandler;
-import org.exbin.framework.bined.BinedOptionsManager;
 import org.exbin.framework.bined.gui.BinEdComponentPanel;
 
 /**

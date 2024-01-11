@@ -30,15 +30,9 @@ import org.exbin.bined.swing.extended.ExtCodeArea;
 import org.exbin.framework.api.Preferences;
 import org.exbin.framework.api.XBApplication;
 import org.exbin.framework.bined.gui.BinEdComponentPanel;
-import org.exbin.framework.bined.gui.BinaryStatusPanel;
-import org.exbin.framework.bined.options.impl.StatusOptionsImpl;
 import org.exbin.framework.bined.preferences.BinaryEditorPreferences;
 import org.exbin.framework.bined.preferences.CodeAreaPreferences;
-import org.exbin.framework.bined.preferences.StatusPreferences;
-import org.exbin.framework.editor.api.EditorProvider;
-import org.exbin.framework.editor.text.EncodingsHandler;
 import org.exbin.framework.editor.text.preferences.TextFontPreferences;
-import org.exbin.framework.frame.api.FrameModuleApi;
 
 /**
  * File manager for binary editor.
@@ -49,9 +43,7 @@ import org.exbin.framework.frame.api.FrameModuleApi;
 public class BinEdFileManager {
 
     private XBApplication application;
-    private EditorProvider editorProvider;
 
-    private BinaryStatusPanel binaryStatusPanel;
     private final SegmentsRepository segmentsRepository = new SegmentsRepository();
     private final List<BinEdFileExtension> binEdComponentExtensions = new ArrayList<>();
     private final List<ActionStatusUpdateListener> actionStatusUpdateListeners = new ArrayList<>();
@@ -64,10 +56,6 @@ public class BinEdFileManager {
 
     public void setApplication(XBApplication application) {
         this.application = application;
-    }
-
-    public void setEditorProvider(EditorProvider editorProvider) {
-        this.editorProvider = editorProvider;
     }
 
     public void initFileHandler(BinEdFileHandler fileHandler) {
@@ -107,9 +95,6 @@ public class BinEdFileManager {
 
         TextFontPreferences textFontPreferences = binaryEditorPreferences.getFontPreferences();
         ((FontCapable) codeArea).setCodeFont(textFontPreferences.isUseDefaultFont() ? CodeAreaPreferences.DEFAULT_FONT : textFontPreferences.getFont(CodeAreaPreferences.DEFAULT_FONT));
-        if (binaryStatusPanel != null) {
-            binaryStatusPanel.loadFromPreferences(binaryEditorPreferences.getStatusPreferences());
-        }
     }
 
     public void initCommandHandler(BinEdComponentPanel componentPanel) {
@@ -139,33 +124,10 @@ public class BinEdFileManager {
         painterPriorityPositionColorModifiers.remove(modifier);
     }
 
-//    public void registerStatusBar() {
-//        binaryStatusPanel = new BinaryStatusPanel();
-//        FrameModuleApi frameModule = application.getModuleRepository().getModuleByInterface(FrameModuleApi.class);
-//        frameModule.registerStatusBar(BinedModule.MODULE_ID, BinedModule.BINARY_STATUS_BAR_ID, binaryStatusPanel);
-//        frameModule.switchStatusBar(BinedModule.BINARY_STATUS_BAR_ID);
-//        ((BinEdEditorProvider) editorProvider).registerBinaryStatus(binaryStatusPanel);
-//        ((BinEdEditorProvider) editorProvider).registerEncodingStatus(binaryStatusPanel);
-//    }
-
-    public void updateTextEncodingStatus(EncodingsHandler encodingsHandler) {
-        if (binaryStatusPanel != null) {
-            encodingsHandler.setTextEncodingStatus(binaryStatusPanel);
-        }
-    }
-
     public void updateActionStatus(@Nullable CodeAreaCore codeArea) {
         for (ActionStatusUpdateListener listener : actionStatusUpdateListeners) {
             listener.updateActionStatus(codeArea);
         }
-    }
-
-    public void applyPreferencesChanges(StatusOptionsImpl options) {
-        binaryStatusPanel.setStatusOptions(options);
-    }
-
-    public void setStatusControlHandler(BinaryStatusPanel.StatusControlHandler statusControlHandler) {
-        binaryStatusPanel.setStatusControlHandler(statusControlHandler);
     }
 
     public void setCommandHandlerProvider(CodeAreaCommandHandlerProvider commandHandlerProvider) {
@@ -180,18 +142,9 @@ public class BinEdFileManager {
         actionStatusUpdateListeners.add(listener);
     }
 
-    public void loadFromPreferences(Preferences preferences) {
-        binaryStatusPanel.loadFromPreferences(new StatusPreferences(preferences));
-    }
-
     @Nonnull
     public Iterable<BinEdFileExtension> getBinEdComponentExtensions() {
         return binEdComponentExtensions;
-    }
-
-    @Nullable
-    public BinaryStatusPanel getBinaryStatusPanel() {
-        return binaryStatusPanel;
     }
 
     @ParametersAreNonnullByDefault

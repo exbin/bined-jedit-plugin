@@ -22,7 +22,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.swing.JPanel;
-import org.exbin.bined.jedit.action.OptionsAction;
+import org.exbin.bined.jedit.main.BinEdManager;
 import org.exbin.framework.bined.BinEdFileHandler;
 import org.exbin.framework.bined.gui.BinEdComponentPanel;
 import org.gjt.sp.jedit.EBComponent;
@@ -68,6 +68,9 @@ public class BinEdEditPanel extends JPanel implements EBComponent, BinEdActions,
 
         super.add(BorderLayout.CENTER, editorFilePanel);
         editorFile.newFile();
+        
+        BinEdManager binedManager = BinEdManager.getInstance();
+        toolPanel.setOptionsAction(binedManager.getOptionsAction(editorFile.getFileHandler()));
     }
 
     @Override

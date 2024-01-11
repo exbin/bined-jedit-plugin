@@ -18,11 +18,18 @@ package org.exbin.bined.jedit.main;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Frame;
+import java.awt.Image;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.swing.Action;
+import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.JRootPane;
+import javax.swing.SwingUtilities;
 import org.exbin.bined.jedit.JEditPreferencesWrapper;
 import org.exbin.framework.api.Preferences;
 import org.exbin.framework.api.XBApplication;
@@ -30,6 +37,9 @@ import org.exbin.framework.api.XBApplicationModuleRepository;
 import org.exbin.framework.bined.BinedModule;
 import org.exbin.framework.frame.api.FrameModuleApi;
 import org.exbin.framework.utils.WindowUtils;
+import org.exbin.framework.utils.WindowUtils.DialogWrapper;
+import org.exbin.framework.utils.handler.OkCancelService;
+import org.gjt.sp.jedit.View;
 
 /**
  * Application wrapper.
@@ -38,8 +48,12 @@ import org.exbin.framework.utils.WindowUtils;
  */
 @ParametersAreNonnullByDefault
 public class Application implements XBApplication {
-    
+
+    public static final String RESOURCES_DIALOG_TITLE = "dialog.title";
+
     private BinedModule binedModule = new BinedModule();
+    private View view;
+
     private FrameModuleApi frameModule = new FrameModuleApi() {
         @Override
         public void createMainMenu() {
@@ -51,34 +65,60 @@ public class Application implements XBApplication {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
+        @Nonnull
         @Override
-        public WindowUtils.DialogWrapper createDialog() {
-            throw new UnsupportedOperationException("Not supported yet.");
+        public DialogWrapper createDialog() {
+            return createDialog(null, null);
+        }
+
+        @Nonnull
+        @Override
+        public DialogWrapper createDialog(@Nullable JPanel panel) {
+            return createDialog(view, Dialog.ModalityType.APPLICATION_MODAL, panel, null);
+        }
+
+        @Nonnull
+        @Override
+        public DialogWrapper createDialog(@Nullable JPanel panel, @Nullable JPanel controlPanel) {
+            return createDialog(view, Dialog.ModalityType.APPLICATION_MODAL, panel, controlPanel);
+        }
+
+        @Nonnull
+        @Override
+        public DialogWrapper createDialog(Component parentComponent, Dialog.ModalityType modalityType, @Nullable JPanel panel) {
+            return createDialog(parentComponent, modalityType, panel, null);
+        }
+
+        @Nonnull
+        @Override
+        public DialogWrapper createDialog(Component parentComponent, Dialog.ModalityType modalityType, @Nullable JPanel panel, @Nullable JPanel controlPanel) {
+            JPanel dialogPanel = controlPanel != null ? WindowUtils.createDialogPanel(panel, controlPanel) : panel;
+
+            DialogWrapper dialog = WindowUtils.createDialog(dialogPanel, parentComponent, "", modalityType);
+            Optional<Image> applicationIcon = Application.this.getApplicationIcon();
+            if (applicationIcon.isPresent()) {
+                ((JDialog) dialog.getWindow()).setIconImage(applicationIcon.get());
+            }
+            if (controlPanel instanceof OkCancelService) {
+                JButton defaultButton = ((OkCancelService) controlPanel).getDefaultButton();
+                if (defaultButton != null) {
+                    JRootPane rootPane = SwingUtilities.getRootPane(dialog.getWindow());
+                    if (rootPane != null) {
+                        rootPane.setDefaultButton(defaultButton);
+                    }
+                }
+            }
+            return dialog;
         }
 
         @Override
-        public WindowUtils.DialogWrapper createDialog(JPanel panel) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-        public WindowUtils.DialogWrapper createDialog(JPanel panel, JPanel controlPanel) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-        public WindowUtils.DialogWrapper createDialog(Component parentComponent, Dialog.ModalityType modalityType, JPanel panel) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-        public WindowUtils.DialogWrapper createDialog(Component parentComponent, Dialog.ModalityType modalityType, JPanel panel, JPanel controlPanel) {
-            throw new UnsupportedOperationException("Not supported yet.");
+        public void setDialogTitle(DialogWrapper dialog, ResourceBundle resourceBundle) {
+            ((JDialog) dialog.getWindow()).setTitle(resourceBundle.getString(RESOURCES_DIALOG_TITLE));
         }
 
         @Override
         public Frame getFrame() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return null;
         }
 
         @Override
@@ -125,11 +165,6 @@ public class Application implements XBApplication {
         public void saveFramePosition() {
             throw new UnsupportedOperationException("Not supported yet.");
         }
-
-        @Override
-        public void setDialogTitle(WindowUtils.DialogWrapper dialog, ResourceBundle resourceBundle) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
     };
 
     public Application() {
@@ -142,17 +177,26 @@ public class Application implements XBApplication {
     }
 
     @Nonnull
+    public Optional<Image> getApplicationIcon() {
+        return Optional.empty();
+    }
+
+    public void setView(View view) {
+        this.view = view;
+    }
+
+    @Nonnull
     @Override
     public XBApplicationModuleRepository getModuleRepository() {
         return new XBApplicationModuleRepository() {
             @Override
             public Object getModuleRecordById(String moduleId) {
-                throw new UnsupportedOperationException("Not supported yet.");
+                throw new UnsupportedOperationException();
             }
 
             @Override
             public Object getModuleById(String moduleId) {
-                throw new UnsupportedOperationException("Not supported yet.");
+                throw new UnsupportedOperationException();
             }
 
             @Override
@@ -162,7 +206,7 @@ public class Application implements XBApplication {
                 } else if (interfaceClass.equals(FrameModuleApi.class)) {
                     return (T) frameModule;
                 }
-                throw new UnsupportedOperationException("Not supported yet.");
+                throw new UnsupportedOperationException();
             }
         };
     }

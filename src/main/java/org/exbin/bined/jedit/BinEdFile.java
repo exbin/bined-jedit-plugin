@@ -37,6 +37,7 @@ import org.exbin.auxiliary.binary_data.delta.DeltaDocument;
 import org.exbin.auxiliary.binary_data.delta.FileDataSource;
 import org.exbin.auxiliary.binary_data.delta.SegmentsRepository;
 import org.exbin.bined.EditMode;
+import org.exbin.bined.jedit.main.Application;
 import org.exbin.bined.jedit.main.BinEdManager;
 import org.exbin.bined.swing.extended.ExtCodeArea;
 import org.exbin.framework.bined.BinEdFileHandler;
@@ -69,6 +70,7 @@ public class BinEdFile implements BinEdComponentFileApi {
         fileHandler = new BinEdFileHandler();
         BinEdFileManager fileManager = binEdManager.getFileManager();
         fileManager.initFileHandler(fileHandler);
+        binEdManager.initFileHandler(fileHandler);
         ExtCodeArea codeArea = fileHandler.getCodeArea();
 
         getSegmentsRepository();
@@ -100,8 +102,13 @@ public class BinEdFile implements BinEdComponentFileApi {
     }
 
     public boolean releaseFile() {
-        throw new UnsupportedOperationException("Not supported yet.");
-        // return fileHandler.releaseFile();
+        if (fileHandler.isModified()) {
+            throw new UnsupportedOperationException("Not supported yet.");
+//            FileModuleApi fileModule = application.getModuleRepository().getModuleByInterface(FileModuleApi.class);
+//            return fileModule.getFileActions().showAskForSaveDialog(fileHandler, fileTypes, this);
+        }
+
+        return true;
     }
 
     @Nonnull
@@ -115,6 +122,10 @@ public class BinEdFile implements BinEdComponentFileApi {
     }
 
     public void setView(View view) {
+        BinEdManager binEdManager = BinEdManager.getInstance();
+        Application application = binEdManager.getApplication();
+        application.setView(view);
+
         // fileHandler.setView(view);
     }
 
@@ -330,6 +341,6 @@ public class BinEdFile implements BinEdComponentFileApi {
     }
 
     public void requestFocus() {
-        fileHandler.getCodeArea().requestFocus();
+        fileHandler.requestFocus();
     }
 }

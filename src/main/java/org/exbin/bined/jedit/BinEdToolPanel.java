@@ -36,8 +36,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JToolBar;
 import org.exbin.bined.CodeType;
-import org.exbin.bined.jedit.action.OptionsAction;
-import org.exbin.bined.jedit.main.BinEdManager;
 import org.exbin.bined.operation.BinaryDataCommand;
 import org.exbin.bined.operation.BinaryDataOperationException;
 import org.exbin.bined.operation.undo.BinaryDataUndoHandler;
@@ -255,9 +253,9 @@ public class BinEdToolPanel extends JPanel {
 
         add(codeTypeDropDown);
 
-        BinEdManager binedManager = BinEdManager.getInstance();
-        optionsAction = new OptionsAction(editPanel.getFileHandler(), binedManager.getPreferences());
-        add(makeCustomButton("bined.options", optionsAction));
+        add(makeCustomButton("bined.options", (e) -> {
+            optionsAction.actionPerformed(e);
+        }));
     }
 
     private void updateCycleButtonState() {
@@ -302,6 +300,10 @@ public class BinEdToolPanel extends JPanel {
     void propertiesChanged() {
         label.setText(editPanel.getFileName());
 //        label.setVisible(jEdit.getProperty(OPTION_PREFIX + "show-filepath").equals("true"));
+    }
+
+    public void setOptionsAction(AbstractAction optionsAction) {
+        this.optionsAction = optionsAction;
     }
 
     private void showUnprintablesToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {

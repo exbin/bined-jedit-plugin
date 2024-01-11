@@ -13,7 +13,6 @@ import org.exbin.xbup.operation.Command;
 /**
  * Undo support handler.
  *
- * @version 0.2.1 2017/06/06
  * @author ExBin Project (http://exbin.org)
  */
 public interface XBUndoHandler {

@@ -376,6 +376,11 @@ public class BinEdFileHandler implements FileHandler, UndoFileHandler, BinEdComp
     }
 
     @Nonnull
+    public BinEdEditorComponent getEditorComponent() {
+        return editorComponent;
+    }
+
+    @Nonnull
     public ExtCodeArea getCodeArea() {
         return editorComponent.getCodeArea();
     }
