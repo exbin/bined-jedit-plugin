@@ -30,7 +30,6 @@ import org.exbin.framework.utils.WindowUtils;
 import org.exbin.framework.utils.gui.CloseControlPanel;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.swing.AbstractAction;
 import javax.swing.GrayFilter;
@@ -52,25 +51,55 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import jdk.nashorn.internal.runtime.regexp.joni.EncodingHelper;
+import org.exbin.auxiliary.binary_data.delta.DeltaDocument;
+import org.exbin.bined.CodeAreaCaretPosition;
+import org.exbin.bined.EditMode;
 import org.exbin.bined.EditOperation;
+import org.exbin.bined.SelectionRange;
+import org.exbin.bined.capability.EditModeCapable;
 import org.exbin.bined.jedit.action.OptionsAction;
-import org.exbin.framework.bined.BinEdEditorProvider;
+import org.exbin.bined.swing.CodeAreaCommandHandler;
 import org.exbin.framework.bined.BinEdFileHandler;
 import org.exbin.framework.bined.BinEdFileManager;
 import org.exbin.framework.bined.BinaryStatusApi;
+import org.exbin.framework.bined.CodeAreaCommandHandlerProvider;
 import org.exbin.framework.bined.action.EditSelectionAction;
 import org.exbin.framework.bined.action.GoToPositionAction;
 import org.exbin.framework.bined.bookmarks.BookmarksManager;
+import org.exbin.framework.bined.bookmarks.BookmarksPositionColorModifier;
+import org.exbin.framework.bined.bookmarks.action.ManageBookmarksAction;
 import org.exbin.framework.bined.compare.action.CompareFilesAction;
 import org.exbin.framework.bined.gui.BinEdComponentPanel;
 import org.exbin.framework.bined.gui.BinaryStatusPanel;
-import org.exbin.framework.bined.inspector.action.ShowParsingPanelAction;
+import org.exbin.framework.bined.inspector.BasicValuesPositionColorModifier;
+import org.exbin.framework.bined.inspector.BinEdComponentInspector;
+import org.exbin.framework.bined.macro.MacroManager;
+import org.exbin.framework.bined.macro.action.ManageMacrosAction;
+import org.exbin.framework.bined.macro.operation.CodeAreaMacroCommandHandler;
+import org.exbin.framework.bined.macro.operation.MacroStep;
 import org.exbin.framework.bined.operation.action.ConvertDataAction;
 import org.exbin.framework.bined.operation.action.InsertDataAction;
+import org.exbin.framework.bined.operation.api.ConvertDataMethod;
+import org.exbin.framework.bined.operation.api.InsertDataMethod;
+import org.exbin.framework.bined.operation.bouncycastle.component.ComputeHashDataMethod;
+import org.exbin.framework.bined.operation.component.BitSwappingDataMethod;
+import org.exbin.framework.bined.operation.component.RandomDataMethod;
+import org.exbin.framework.bined.operation.component.SimpleFillDataMethod;
+import org.exbin.framework.bined.search.BinEdComponentSearch;
+import org.exbin.framework.bined.search.action.FindReplaceActions;
 import org.exbin.framework.bined.tool.content.action.ClipboardContentAction;
 import org.exbin.framework.bined.tool.content.action.DragDropContentAction;
+import org.exbin.framework.editor.api.EditorProvider;
+import org.exbin.framework.editor.text.EncodingsHandler;
 import org.exbin.framework.file.api.FileHandler;
+import org.exbin.framework.file.api.FileType;
 import org.exbin.framework.utils.LanguageUtils;
 
 /**
@@ -94,14 +123,61 @@ public class BinEdManager {
     private final BinaryEditorPreferences preferences;
     private BinEdFileManager fileManager = new BinEdFileManager();
     private volatile boolean initialized;
-    
+
+    private FindReplaceActions findReplaceActions;
     private BookmarksManager bookmarksManager;
+    private MacroManager macroManager;
+    private BinaryStatusPanel binaryStatus = new BinaryStatusPanel();
+    private EncodingsHandler encodingsHandler = new EncodingsHandler();
+
+    private final List<InsertDataMethod> insertDataComponents = new ArrayList<>();
+    private final List<ConvertDataMethod> convertDataComponents = new ArrayList<>();
+    private BasicValuesPositionColorModifier basicValuesColorModifier = new BasicValuesPositionColorModifier();
 
     private BinEdManager() {
         preferences = new BinaryEditorPreferences(application.getAppPreferences());
         fileManager.setApplication(application);
         bookmarksManager = new BookmarksManager();
         bookmarksManager.setApplication(application);
+        ((ManageBookmarksAction) bookmarksManager.getManageBookmarksAction()).setBookmarksManager(bookmarksManager);
+        macroManager = new MacroManager();
+        macroManager.setApplication(application);
+        ((ManageMacrosAction) macroManager.getManageMacrosAction()).setMacroManager(macroManager);
+        findReplaceActions = new FindReplaceActions();
+        encodingsHandler.setApplication(application);
+
+        SimpleFillDataMethod simpleFillDataMethod = new SimpleFillDataMethod();
+        simpleFillDataMethod.setApplication(this.application);
+        addInsertDataComponent(simpleFillDataMethod);
+        RandomDataMethod randomDataMethod = new RandomDataMethod();
+        randomDataMethod.setApplication(this.application);
+        addInsertDataComponent(randomDataMethod);
+        BitSwappingDataMethod bitSwappingDataMethod = new BitSwappingDataMethod();
+        bitSwappingDataMethod.setApplication(this.application);
+        addConvertDataComponent(bitSwappingDataMethod);
+        ComputeHashDataMethod computeHashDataMethod = new ComputeHashDataMethod();
+        computeHashDataMethod.setApplication(this.application);
+        addConvertDataComponent(computeHashDataMethod);
+
+        fileManager.addPainterColorModifier(basicValuesColorModifier);
+        fileManager.addBinEdComponentExtension(new BinEdFileManager.BinEdFileExtension() {
+            @Nonnull
+            @Override
+            public Optional<BinEdComponentPanel.BinEdComponentExtension> createComponentExtension(BinEdComponentPanel component) {
+                BinEdComponentInspector binEdComponentInspector = new BinEdComponentInspector();
+                binEdComponentInspector.setBasicValuesColorModifier(basicValuesColorModifier);
+                return Optional.of(binEdComponentInspector);
+            }
+        });
+
+        fileManager.addActionStatusUpdateListener((codeArea) -> {
+            findReplaceActions.updateForActiveFile();
+        });
+        fileManager.addBinEdComponentExtension((BinEdComponentPanel component) -> Optional.of(new BinEdComponentSearch()));
+
+        registerCodeAreaCommandHandlerProvider((codeArea, undoHandler) -> new CodeAreaMacroCommandHandler(codeArea, undoHandler));
+
+        findReplaceActions.addFindAgainListener();
     }
 
     @Nonnull
@@ -118,6 +194,9 @@ public class BinEdManager {
         if (!initialized) {
             initialized = true;
             bookmarksManager.init();
+            macroManager.init();
+            encodingsHandler.init();
+            encodingsHandler.setParentComponent(application.getView());
             // TODO new BinEdInspectorManager().init();
         }
 
@@ -165,6 +244,7 @@ public class BinEdManager {
                                 InsertDataAction insertDataAction = new InsertDataAction();
                                 insertDataAction.setup(application, resourceBundle);
                                 insertDataAction.updateForActiveCodeArea(codeArea);
+                                insertDataAction.setInsertDataComponents(insertDataComponents);
                                 insertDataAction.actionPerformed(new ActionEvent(keyEvent.getSource(),
                                         keyEvent.getID(),
                                         ""));
@@ -176,6 +256,7 @@ public class BinEdManager {
                                 ConvertDataAction convertDataAction = new ConvertDataAction();
                                 convertDataAction.setup(application, resourceBundle);
                                 convertDataAction.updateForActiveCodeArea(codeArea);
+                                convertDataAction.setConvertDataComponents(convertDataComponents);
                                 convertDataAction.actionPerformed(new ActionEvent(keyEvent.getSource(),
                                         keyEvent.getID(),
                                         ""));
@@ -197,54 +278,45 @@ public class BinEdManager {
 //            }
 //        }
 //        );
-
-        BinaryStatusPanel binaryStatusPanel = new BinaryStatusPanel();
+        
         BinEdComponentPanel binedComponent = fileHandler.getComponent();
-        binedComponent.add(binaryStatusPanel, BorderLayout.SOUTH);
-        binaryStatusPanel.setStatusControlHandler(new BinaryStatusPanel.StatusControlHandler() {
+        binedComponent.add(binaryStatus, BorderLayout.SOUTH);
+        binaryStatus.setStatusControlHandler(new BinaryStatusPanel.StatusControlHandler() {
             @Override
             public void changeEditOperation(EditOperation editOperation) {
-//                Optional<FileHandler> activeFile = editorProvider.getActiveFile();
-//                if (activeFile.isPresent()) {
-//                    ((BinEdFileHandler) activeFile.get()).getCodeArea().setEditOperation(editOperation);
-//                }
+                fileHandler.getCodeArea().setEditOperation(editOperation);
             }
 
             @Override
             public void changeCursorPosition() {
-//                if (goToPositionAction != null) {
-//                    goToPositionAction.actionPerformed(null);
-//                }
+                createGoToAction(codeArea).actionPerformed(null);
             }
 
             @Override
             public void cycleEncodings() {
-//                if (encodingsHandler != null) {
-//                    encodingsHandler.cycleEncodings();
-//                }
+                if (encodingsHandler != null) {
+                    encodingsHandler.cycleEncodings();
+                }
             }
 
             @Override
             public void encodingsPopupEncodingsMenu(MouseEvent mouseEvent) {
-//                if (encodingsHandler != null) {
-//                    encodingsHandler.popupEncodingsMenu(mouseEvent);
-//                }
+                if (encodingsHandler != null) {
+                    encodingsHandler.popupEncodingsMenu(mouseEvent);
+                }
             }
 
             @Override
             public void changeMemoryMode(BinaryStatusApi.MemoryMode memoryMode) {
-//                FileHandlingMode newHandlingMode = memoryMode == BinaryStatusApi.MemoryMode.DELTA_MODE ? FileHandlingMode.DELTA : FileHandlingMode.MEMORY;
-//                if (newHandlingMode != fileHandlingMode) {
-//                    fileApi.switchFileHandlingMode(newHandlingMode);
-//                    // TODO preferences.getEditorPreferences().setFileHandlingMode(newHandlingMode);
-//                }
+                FileHandlingMode newHandlingMode = memoryMode == BinaryStatusApi.MemoryMode.DELTA_MODE ? FileHandlingMode.DELTA : FileHandlingMode.MEMORY;
+                FileHandlingMode fileHandlingMode = fileHandler.getFileHandlingMode();
+                if (newHandlingMode != fileHandlingMode) {
+                    fileHandler.switchFileHandlingMode(newHandlingMode);
+                    preferences.getEditorPreferences().setFileHandlingMode(newHandlingMode);
+                }
             }
         });
-
-        GoToPositionAction goToPositionAction = new GoToPositionAction();
-        goToPositionAction.setup(application, resourceBundle);
-        goToPositionAction.updateForActiveCodeArea(codeArea);
-        // TODO binEdEditorComponent.setGoToPositionAction(goToPositionAction);
+        registerBinaryStatus(fileHandler);
     }
 
     @Nonnull
@@ -259,6 +331,12 @@ public class BinEdManager {
 
     public void createContextMenu(ExtCodeArea codeArea, BinEdFileHandler fileHandler, final JPopupMenu menu, PopupMenuVariant variant, int x, int y) {
         BasicCodeAreaZone positionZone = codeArea.getPainter().getPositionZone(x, y);
+        BinEdEditorComponent editorComponent = fileHandler.getEditorComponent();
+        EditorProvider editorProvider = new EditorProviderImpl(fileHandler);
+        findReplaceActions.setup(application, editorProvider, resourceBundle);
+        findReplaceActions.updateForActiveFile();
+        bookmarksManager.setEditorProvider(editorProvider);
+        macroManager.setEditorProvider(editorProvider);
 
         if (variant == PopupMenuVariant.EDITOR) {
             switch (positionZone) {
@@ -292,7 +370,7 @@ public class BinEdManager {
                     menu.add(createShowRowPositionMenuItem(codeArea));
                     menu.add(createPositionCodeTypeMenuItem(codeArea));
                     menu.add(new JSeparator());
-                    menu.add(createGoToMenuItem(codeArea));
+                    menu.add(ActionUtils.actionToMenuItem(createGoToAction(codeArea)));
                 }
 
                 break;
@@ -365,6 +443,7 @@ public class BinEdManager {
                     menu.setVisible(false);
                 });
                 menu.add(deleteMenuItem);
+                menu.addSeparator();
 
                 final JMenuItem selectAllMenuItem = new JMenuItem("Select All");
                 selectAllMenuItem.setIcon(new ImageIcon(getClass().getResource(FRAMEWORK_TANGO_ICON_THEME_PREFIX + "edit-select-all.png")));
@@ -375,54 +454,34 @@ public class BinEdManager {
                 });
                 menu.add(selectAllMenuItem);
 
-                menu.add(createEditSelectionMenuItem(codeArea));
+                menu.add(ActionUtils.actionToMenuItem(createEditSelectionAction(codeArea)));
+
+                menu.add(ActionUtils.actionToMenuItem(createInsertDataAction(editorComponent)));
+                menu.add(ActionUtils.actionToMenuItem(createConvertDataAction(editorComponent)));
 
                 menu.addSeparator();
-/*
-                final JMenuItem findMenuItem = new JMenuItem("Find...");
-                findMenuItem.setIcon(new ImageIcon(getClass().getResource(BINED_TANGO_ICON_THEME_PREFIX + "edit-find.png")));
-                findMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, ActionUtils.getMetaMask()));
-                findMenuItem.addActionListener((ActionEvent e) -> {
-                    SearchAction searchAction = new SearchAction(codeArea, editorComponent.getComponentPanel());
-                    searchAction.actionPerformed(e);
-                    searchAction.switchReplaceMode(BinarySearchPanel.SearchOperation.FIND);
-                });
-                menu.add(findMenuItem);
 
-                final JMenuItem replaceMenuItem = new JMenuItem("Replace...");
-                replaceMenuItem.setIcon(new ImageIcon(getClass().getResource(BINED_TANGO_ICON_THEME_PREFIX + "edit-find-replace.png")));
-                replaceMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_H, ActionUtils.getMetaMask()));
-                replaceMenuItem.setEnabled(codeArea.isEditable());
-                replaceMenuItem.addActionListener((ActionEvent e) -> {
-                    SearchAction searchAction = new SearchAction(codeArea, editorComponent.getComponentPanel());
-                    searchAction.actionPerformed(e);
-                    searchAction.switchReplaceMode(BinarySearch.SearchOperation.REPLACE);
-                });
-                menu.add(replaceMenuItem);
-*/
-                JMenuItem goToMenuItem = createGoToMenuItem(codeArea);
-                menu.add(goToMenuItem);
+                menu.add(ActionUtils.actionToMenuItem(createGoToAction(codeArea)));
 
-//                menu.add(bookmarksSupport.createBookmarksPopupMenu());
+                menu.add(ActionUtils.actionToMenuItem(findReplaceActions.getEditFindAction()));
+                menu.add(ActionUtils.actionToMenuItem(findReplaceActions.getEditReplaceAction()));
+
+                JMenu bookmarksMenu = bookmarksManager.getBookmarksMenu();
+                bookmarksManager.updateBookmarksMenu();
+                menu.add(bookmarksMenu);
+
+                JMenu macrosMenu = macroManager.getMacrosMenu();
+                macroManager.updateMacrosMenu();
+                menu.add(macrosMenu);
             }
         }
 
         menu.addSeparator();
 
-//        if (editorComponent != null) {
-//            JMenuItem insertDataMenuItem = createInsertDataMenuItem(editorComponent);
-//            insertDataMenuItem.setEnabled(codeArea.isEditable());
-//            menu.add(insertDataMenuItem);
-//            JMenuItem convertDataMenuItem = createConvertDataMenuItem(editorComponent);
-//            convertDataMenuItem.setEnabled(codeArea.isEditable());
-//            menu.add(convertDataMenuItem);
-//            menu.addSeparator();
-//        }
-
         JMenu toolsMenu = new JMenu("Tools");
-        toolsMenu.add(createCompareFilesMenuItem(codeArea));
-        toolsMenu.add(createClipboardContentMenuItem());
-        toolsMenu.add(createDragDropContentMenuItem());
+        toolsMenu.add(ActionUtils.actionToMenuItem(createCompareFilesAction(codeArea, editorProvider)));
+        toolsMenu.add(ActionUtils.actionToMenuItem(createClipboardContentAction(editorProvider)));
+        toolsMenu.add(ActionUtils.actionToMenuItem(createDragDropContentAction(editorProvider)));
         menu.add(toolsMenu);
 
 //        if (editorComponent != null) {
@@ -431,7 +490,6 @@ public class BinEdManager {
 //                menu.add(reloadFileMenuItem);
 //            }
 //        }
-
         final JMenuItem optionsMenuItem = new JMenuItem("Options...");
         optionsMenuItem.setIcon(new ImageIcon(getClass().getResource(
                 "/org/exbin/framework/options/resources/icons/Preferences16.gif")));
@@ -486,56 +544,45 @@ public class BinEdManager {
     }
 
     @Nonnull
-    private JMenuItem createGoToMenuItem(ExtCodeArea codeArea) {
-        final JMenuItem goToMenuItem = new JMenuItem("Go To...");
-        goToMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, ActionUtils.getMetaMask()));
+    private GoToPositionAction createGoToAction(ExtCodeArea codeArea) {
         GoToPositionAction goToPositionAction = new GoToPositionAction();
         goToPositionAction.setup(application, resourceBundle);
-        goToMenuItem.addActionListener(goToPositionAction);
-        return goToMenuItem;
+        goToPositionAction.updateForActiveCodeArea(codeArea);
+        return goToPositionAction;
     }
 
     @Nonnull
-    private JMenuItem createEditSelectionMenuItem(ExtCodeArea codeArea) {
-        final JMenuItem editSelectionMenuItem = new JMenuItem("Edit Selection...");
+    private EditSelectionAction createEditSelectionAction(ExtCodeArea codeArea) {
         EditSelectionAction editSelectionAction = new EditSelectionAction();
         editSelectionAction.setup(application, resourceBundle);
         editSelectionAction.updateForActiveCodeArea(codeArea);
-        editSelectionMenuItem.addActionListener(editSelectionAction);
-        return editSelectionMenuItem;
+        return editSelectionAction;
     }
 
     @Nonnull
-    private JMenuItem createInsertDataMenuItem(BinEdEditorComponent editorComponent) {
-        final JMenuItem insertDataMenuItem = new JMenuItem("Insert Data...");
-        insertDataMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, ActionUtils.getMetaMask()));
+    private InsertDataAction createInsertDataAction(BinEdEditorComponent editorComponent) {
         InsertDataAction insertDataAction = new InsertDataAction();
         insertDataAction.setup(application, resourceBundle);
-        // TODO insertDataAction.setInsertDataComponents(insertDataComponents);
         insertDataAction.updateForActiveCodeArea(editorComponent.getCodeArea());
-        insertDataMenuItem.addActionListener(insertDataAction);
-        return insertDataMenuItem;
+        insertDataAction.setInsertDataComponents(insertDataComponents);
+        return insertDataAction;
     }
 
     @Nonnull
-    private JMenuItem createConvertDataMenuItem(BinEdEditorComponent editorComponent) {
-        final JMenuItem convertDataMenuItem = new JMenuItem("Convert Data...");
-        convertDataMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, ActionUtils.getMetaMask()));
+    private ConvertDataAction createConvertDataAction(BinEdEditorComponent editorComponent) {
         ConvertDataAction convertDataAction = new ConvertDataAction();
         convertDataAction.setup(application, resourceBundle);
         convertDataAction.updateForActiveCodeArea(editorComponent.getCodeArea());
-        convertDataMenuItem.addActionListener(convertDataAction);
-        return convertDataMenuItem;
+        convertDataAction.setConvertDataComponents(convertDataComponents);
+        return convertDataAction;
     }
 
     @Nonnull
-    private JMenuItem createCompareFilesMenuItem(ExtCodeArea codeArea) {
-        final JMenuItem compareFilesMenuItem = new JMenuItem("Compare Files...");
+    private CompareFilesAction createCompareFilesAction(ExtCodeArea codeArea, EditorProvider editorProvider) {
         CompareFilesAction compareFilesAction = new CompareFilesAction();
-// TODO        compareFilesAction.setup(application, editorProvider, resourceBundle);
+        compareFilesAction.setup(application, editorProvider, resourceBundle);
         compareFilesAction.setCodeArea(codeArea);
-        compareFilesMenuItem.addActionListener(compareFilesAction);
-        return compareFilesMenuItem;
+        return compareFilesAction;
     }
 
     @Nonnull
@@ -637,27 +684,131 @@ public class BinEdManager {
     }
 
     @Nonnull
-    public JMenuItem createClipboardContentMenuItem() {
-        JMenuItem clipboardContentMenuItem = new JMenuItem("Clipboard Content...");
-        clipboardContentMenuItem.addActionListener(new ClipboardContentAction());
-        return clipboardContentMenuItem;
+    public ClipboardContentAction createClipboardContentAction(EditorProvider editorProvider) {
+        ClipboardContentAction clipboardContentAction = new ClipboardContentAction();
+        clipboardContentAction.setup(application, resourceBundle);
+        clipboardContentAction.setEditorProvider(editorProvider);
+        return clipboardContentAction;
     }
 
     @Nonnull
-    public JMenuItem createDragDropContentMenuItem() {
-        JMenuItem dragDropContentMenuItem = new JMenuItem("Drag&Drop Content...");
-        dragDropContentMenuItem.addActionListener(new DragDropContentAction());
-        return dragDropContentMenuItem;
+    public DragDropContentAction createDragDropContentAction(EditorProvider editorProvider) {
+        DragDropContentAction dragDropContentAction = new DragDropContentAction();
+        dragDropContentAction.setup(application, resourceBundle);
+        dragDropContentAction.setEditorProvider(editorProvider);
+        return dragDropContentAction;
     }
 
     @Nonnull
     public JMenuItem createShowInspectorPanel(BinEdComponentPanel binEdComponentPanel) {
-        JCheckBoxMenuItem clipboardContentMenuItem = new JCheckBoxMenuItem("Inspector Panel");
+         JCheckBoxMenuItem clipboardContentMenuItem = new JCheckBoxMenuItem("Inspector Panel");
 //        clipboardContentMenuItem.setSelected(inspectorSupport.isShowParsingPanel(binEdComponentPanel));
 //        clipboardContentMenuItem.addActionListener(event -> {
 //            inspectorSupport.showParsingPanelAction(binEdComponentPanel).actionPerformed(event);
 //        });
         return clipboardContentMenuItem;
+    }
+
+    public void addInsertDataComponent(InsertDataMethod insertDataComponent) {
+        insertDataComponents.add(insertDataComponent);
+    }
+
+    public void addConvertDataComponent(ConvertDataMethod convertDataComponent) {
+        convertDataComponents.add(convertDataComponent);
+    }
+
+    private void registerCodeAreaCommandHandlerProvider(CodeAreaCommandHandlerProvider commandHandlerProvider) {
+        fileManager.setCommandHandlerProvider(commandHandlerProvider);
+    }
+
+    public void registerBinaryStatus(BinEdFileHandler fileHandler) {
+        ExtCodeArea codeArea = fileHandler.getCodeArea();
+        codeArea.addDataChangedListener(() -> {
+            fileHandler.getComponent().notifyDataChanged();
+//            if (editorModificationListener != null) {
+//                editorModificationListener.modified();
+//            }
+            updateCurrentDocumentSize(fileHandler);
+        });
+
+        codeArea.addSelectionChangedListener(() -> {
+            binaryStatus.setSelectionRange(codeArea.getSelection());
+            // updateClipboardActionsStatus();
+        });
+
+        codeArea.addCaretMovedListener((CodeAreaCaretPosition caretPosition) -> {
+            binaryStatus.setCursorPosition(caretPosition);
+        });
+
+        codeArea.addEditModeChangedListener((EditMode mode, EditOperation operation) -> {
+            binaryStatus.setEditMode(mode, operation);
+        });
+
+        updateStatus(fileHandler);
+    }
+
+    public void updateStatus(BinEdFileHandler fileHandler) {
+        updateCurrentDocumentSize(fileHandler);
+        updateCurrentCaretPosition(fileHandler);
+        updateCurrentSelectionRange(fileHandler);
+        updateCurrentMemoryMode(fileHandler);
+        updateCurrentEditMode(fileHandler);
+    }
+
+    private void updateCurrentDocumentSize(BinEdFileHandler fileHandler) {
+        if (binaryStatus == null) {
+            return;
+        }
+
+        ExtCodeArea codeArea = fileHandler.getCodeArea();
+        long documentOriginalSize = fileHandler.getDocumentOriginalSize();
+        long dataSize = codeArea.getDataSize();
+        binaryStatus.setCurrentDocumentSize(dataSize, documentOriginalSize);
+    }
+
+    private void updateCurrentCaretPosition(BinEdFileHandler fileHandler) {
+        if (binaryStatus == null) {
+            return;
+        }
+
+        ExtCodeArea codeArea = fileHandler.getCodeArea();
+        CodeAreaCaretPosition caretPosition = codeArea.getCaretPosition();
+        binaryStatus.setCursorPosition(caretPosition);
+    }
+
+    private void updateCurrentSelectionRange(BinEdFileHandler fileHandler) {
+        if (binaryStatus == null) {
+            return;
+        }
+
+        ExtCodeArea codeArea = fileHandler.getCodeArea();
+        SelectionRange selectionRange = codeArea.getSelection();
+        binaryStatus.setSelectionRange(selectionRange);
+    }
+
+    private void updateCurrentMemoryMode(BinEdFileHandler fileHandler) {
+        if (binaryStatus == null) {
+            return;
+        }
+
+        ExtCodeArea codeArea = fileHandler.getCodeArea();
+        BinaryStatusApi.MemoryMode newMemoryMode = BinaryStatusApi.MemoryMode.RAM_MEMORY;
+        if (((EditModeCapable) codeArea).getEditMode() == EditMode.READ_ONLY) {
+            newMemoryMode = BinaryStatusApi.MemoryMode.READ_ONLY;
+        } else if (codeArea.getContentData() instanceof DeltaDocument) {
+            newMemoryMode = BinaryStatusApi.MemoryMode.DELTA_MODE;
+        }
+
+        binaryStatus.setMemoryMode(newMemoryMode);
+    }
+
+    private void updateCurrentEditMode(BinEdFileHandler fileHandler) {
+        if (binaryStatus == null) {
+            return;
+        }
+
+        ExtCodeArea codeArea = fileHandler.getCodeArea();
+        binaryStatus.setEditMode(codeArea.getEditMode(), codeArea.getActiveOperation());
     }
 
     @Nonnull
@@ -667,5 +818,99 @@ public class BinEdManager {
 
     public enum PopupMenuVariant {
         BASIC, NORMAL, EDITOR
+    }
+
+    private static class EditorProviderImpl implements EditorProvider {
+
+        private BinEdFileHandler fileHandler;
+
+        public EditorProviderImpl(BinEdFileHandler fileHandler) {
+            this.fileHandler = fileHandler;
+        }
+
+        @Override
+        public JComponent getEditorComponent() {
+            return fileHandler.getComponent();
+        }
+
+        @Override
+        public Optional<FileHandler> getActiveFile() {
+            return Optional.of(fileHandler);
+        }
+
+        @Override
+        public String getWindowTitle(String parentTitle) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void openFile(URI fileUri, FileType fileType) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void setModificationListener(EditorProvider.EditorModificationListener editorModificationListener) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void newFile() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void openFile() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void saveFile() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void saveAsFile() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean canSave() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean releaseFile(FileHandler fileHandler) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean releaseAllFiles() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void loadFromFile(String fileName) throws URISyntaxException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void loadFromFile(URI fileUri, FileType fileType) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Optional<File> getLastUsedDirectory() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void setLastUsedDirectory(File directory) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void updateRecentFilesList(URI fileUri, FileType fileType) {
+            throw new UnsupportedOperationException();
+        }
     }
 }

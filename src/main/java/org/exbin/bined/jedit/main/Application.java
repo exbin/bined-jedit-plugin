@@ -118,7 +118,7 @@ public class Application implements XBApplication {
 
         @Override
         public Frame getFrame() {
-            return null;
+            return view;
         }
 
         @Override
@@ -183,6 +183,10 @@ public class Application implements XBApplication {
 
     public void setView(View view) {
         this.view = view;
+    }
+
+    public View getView() {
+        return view;
     }
 
     @Nonnull

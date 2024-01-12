@@ -26,12 +26,16 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JMenuItem;
 import org.exbin.bined.basic.BasicCodeAreaZone;
+import org.exbin.bined.swing.CodeAreaCommandHandler;
+import org.exbin.bined.swing.extended.ExtCodeArea;
 import org.exbin.framework.api.XBApplication;
 import org.exbin.framework.bined.gui.BinEdComponentPanel;
 import org.exbin.framework.utils.ActionUtils;
 import org.exbin.framework.editor.api.EditorProvider;
 import org.exbin.framework.bined.BinEdFileHandler;
 import org.exbin.framework.bined.BinedModule;
+import org.exbin.framework.bined.macro.operation.CodeAreaMacroCommandHandler;
+import org.exbin.framework.bined.macro.operation.MacroStep;
 import org.exbin.framework.bined.search.BinEdComponentSearch;
 import org.exbin.framework.bined.search.gui.BinarySearchPanel;
 import org.exbin.framework.file.api.FileDependentAction;
@@ -195,6 +199,20 @@ public class FindReplaceActions implements FileDependentAction {
 
     public void addFindAgainListener(FindAgainListener findAgainListener) {
         findAgainListeners.add(findAgainListener);
+    }
+
+    public void addFindAgainListener() {
+        addFindAgainListener(() -> {
+            Optional<FileHandler> activeFile = editorProvider.getActiveFile();
+            if (activeFile.isPresent()) {
+                BinEdFileHandler fileHandler = (BinEdFileHandler) activeFile.get();
+                ExtCodeArea codeArea = fileHandler.getCodeArea();
+                CodeAreaCommandHandler commandHandler = codeArea.getCommandHandler();
+                if (commandHandler instanceof CodeAreaMacroCommandHandler && ((CodeAreaMacroCommandHandler) commandHandler).isMacroRecording()) {
+                    ((CodeAreaMacroCommandHandler) commandHandler).appendMacroOperationStep(MacroStep.FIND_AGAIN);
+                }
+            }
+        });
     }
 
     public void removeFindAgainListener(FindAgainListener findAgainListener) {
