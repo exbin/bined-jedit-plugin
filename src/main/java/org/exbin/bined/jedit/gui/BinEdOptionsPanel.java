@@ -31,6 +31,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.event.ListSelectionEvent;
+import org.exbin.bined.extended.theme.ExtendedBackgroundPaintMode;
 import org.exbin.bined.swing.extended.color.ExtendedCodeAreaColorProfile;
 import org.exbin.bined.swing.extended.layout.DefaultExtendedCodeAreaLayoutProfile;
 import org.exbin.bined.swing.extended.theme.ExtendedCodeAreaThemeProfile;
@@ -373,7 +374,7 @@ public class BinEdOptionsPanel extends javax.swing.JPanel implements BinEdApplyO
         });
 
         themeProfilesPanel.setAddProfileOperation((JComponent parentComponent, String profileName) -> {
-            ThemeProfilePanel themeProfilePanel = new ThemeProfilePanel();
+            ThemeProfilePanel themeProfilePanel = createThemeProfilePanel();
             themeProfilePanel.setThemeProfile(new ExtendedCodeAreaThemeProfile());
             NamedProfilePanel namedProfilePanel = new NamedProfilePanel(themeProfilePanel);
             namedProfilePanel.setProfileName(profileName);
@@ -402,7 +403,7 @@ public class BinEdOptionsPanel extends javax.swing.JPanel implements BinEdApplyO
             return result.profile;
         });
         themeProfilesPanel.setEditProfileOperation((JComponent parentComponent, ThemeProfilesPanel.ThemeProfile profileRecord) -> {
-            ThemeProfilePanel themeProfilePanel = new ThemeProfilePanel();
+            ThemeProfilePanel themeProfilePanel = createThemeProfilePanel();
             NamedProfilePanel namedProfilePanel = new NamedProfilePanel(themeProfilePanel);
             DefaultControlPanel controlPanel = new DefaultControlPanel();
             JPanel dialogPanel = WindowUtils.createDialogPanel(namedProfilePanel, controlPanel);
@@ -431,7 +432,7 @@ public class BinEdOptionsPanel extends javax.swing.JPanel implements BinEdApplyO
             return result.profile;
         });
         themeProfilesPanel.setCopyProfileOperation((JComponent parentComponent, ThemeProfilesPanel.ThemeProfile profileRecord) -> {
-            ThemeProfilePanel themeProfilePanel = new ThemeProfilePanel();
+            ThemeProfilePanel themeProfilePanel = createThemeProfilePanel();
             themeProfilePanel.setThemeProfile(new ExtendedCodeAreaThemeProfile());
             NamedProfilePanel namedProfilePanel = new NamedProfilePanel(themeProfilePanel);
             DefaultControlPanel controlPanel = new DefaultControlPanel();
@@ -805,6 +806,17 @@ public class BinEdOptionsPanel extends javax.swing.JPanel implements BinEdApplyO
     private static final class ColorProfileResult {
 
         ColorProfilesPanel.ColorProfile profile;
+    }
+
+    @Nonnull
+    private ThemeProfilePanel createThemeProfilePanel() {
+        ThemeProfilePanel themeProfilePanel = new ThemeProfilePanel();
+        List<String> backgroundModes = new ArrayList<>();
+        for (ExtendedBackgroundPaintMode mode : ExtendedBackgroundPaintMode.values()) {
+            backgroundModes.add(resourceBundle.getString("backgroundPaintMode." + mode.name().toLowerCase()));
+        }
+        themeProfilePanel.setBackgroundModes(backgroundModes);
+        return themeProfilePanel;
     }
 
     private static class CategoryItem {

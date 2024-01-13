@@ -506,7 +506,7 @@ public class BinEdManager {
                 menu.addSeparator();
 
                 final JMenuItem onlineHelpMenuItem = new JMenuItem("Online Help...");
-                onlineHelpMenuItem.setIcon(new ImageIcon(getClass().getResource("/org/exbin/framework/bined/resources/icons/open_icon_library/icons/png/16x16/actions/help.png")));
+                onlineHelpMenuItem.setIcon(new ImageIcon(getClass().getResource("/org/exbin/bined/jedit/resources/icons/help.png")));
                 onlineHelpMenuItem.addActionListener(createOnlineHelpAction());
                 menu.add(onlineHelpMenuItem);
 
