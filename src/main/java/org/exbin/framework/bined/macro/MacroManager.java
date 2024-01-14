@@ -392,7 +392,7 @@ public class MacroManager {
         notifyMacroRecordingChange(codeArea);
     }
 
-    private void notifyMacroRecordingChange(ExtCodeArea codeArea) {
+    public void notifyMacroRecordingChange(ExtCodeArea codeArea) {
         startMacroRecordingAction.updateForActiveCodeArea(codeArea);
         stopMacroRecordingAction.updateForActiveCodeArea(codeArea);
         executeLastMacroAction.updateForActiveCodeArea(codeArea);

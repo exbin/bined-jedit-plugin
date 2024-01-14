@@ -118,6 +118,9 @@ distributions {
             from 'src/dist'
             include 'readme.txt'
 
+            from '.'
+            include 'changes.txt'
+
             into('') {
                 from project.jar.archivePath
                 include '*'

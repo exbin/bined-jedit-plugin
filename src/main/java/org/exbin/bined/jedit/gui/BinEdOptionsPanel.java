@@ -15,7 +15,6 @@
  */
 package org.exbin.bined.jedit.gui;
 
-import org.exbin.bined.jedit.BinEdApplyOptions;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Font;
@@ -32,9 +31,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.event.ListSelectionEvent;
 import org.exbin.bined.extended.theme.ExtendedBackgroundPaintMode;
+import org.exbin.bined.jedit.main.BinEdApplyOptions;
 import org.exbin.bined.swing.extended.color.ExtendedCodeAreaColorProfile;
 import org.exbin.bined.swing.extended.layout.DefaultExtendedCodeAreaLayoutProfile;
 import org.exbin.bined.swing.extended.theme.ExtendedCodeAreaThemeProfile;
+import org.exbin.framework.bined.inspector.options.DataInspectorOptions;
+import org.exbin.framework.bined.inspector.options.impl.DataInspectorOptionsImpl;
 import org.exbin.framework.bined.options.CodeAreaColorOptions;
 import org.exbin.framework.bined.options.CodeAreaLayoutOptions;
 import org.exbin.framework.bined.preferences.BinaryEditorPreferences;
@@ -99,6 +101,7 @@ public class BinEdOptionsPanel extends javax.swing.JPanel implements BinEdApplyO
     private final CodeAreaLayoutOptionsImpl layoutOptions = new CodeAreaLayoutOptionsImpl();
     private final CodeAreaColorOptionsImpl colorOptions = new CodeAreaColorOptionsImpl();
     private final CodeAreaThemeOptionsImpl themeOptions = new CodeAreaThemeOptionsImpl();
+    private final DataInspectorOptionsImpl dataInspectorOptions = new DataInspectorOptionsImpl();
 
     private final EditorOptionsPanel editorOptionsPanel = new EditorOptionsPanel();
     private final StatusOptionsPanel statusOptionsPanel = new StatusOptionsPanel();
@@ -782,6 +785,12 @@ public class BinEdOptionsPanel extends javax.swing.JPanel implements BinEdApplyO
         return themeOptions;
     }
 
+    @Nonnull
+    @Override
+    public DataInspectorOptions getDataInspectorOptions() {
+        return dataInspectorOptions;
+    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel categoriesLabel;
     private javax.swing.JList<CategoryItem> categoriesList;

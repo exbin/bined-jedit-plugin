@@ -15,25 +15,36 @@
  */
 package org.exbin.framework.bined;
 
+import java.awt.BorderLayout;
+import java.awt.Font;
+import java.nio.charset.Charset;
 import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 import org.exbin.auxiliary.binary_data.BinaryData;
+import org.exbin.bined.capability.CharsetCapable;
 import org.exbin.bined.extended.layout.ExtendedCodeAreaLayoutProfile;
+import org.exbin.bined.jedit.main.BinEdApplyOptions;
 import org.exbin.bined.operation.swing.CodeAreaOperationCommandHandler;
 import org.exbin.bined.operation.undo.BinaryDataUndoHandler;
 import org.exbin.bined.swing.basic.color.CodeAreaColorsProfile;
+import org.exbin.bined.swing.capability.FontCapable;
 import org.exbin.bined.swing.extended.ExtCodeArea;
 import org.exbin.bined.swing.extended.theme.ExtendedCodeAreaThemeProfile;
 import org.exbin.framework.api.XBApplication;
 import org.exbin.framework.bined.gui.BinEdComponentPanel;
+import org.exbin.framework.bined.gui.BinaryStatusPanel;
 import org.exbin.framework.bined.options.CodeAreaColorOptions;
 import org.exbin.framework.bined.options.CodeAreaLayoutOptions;
 import org.exbin.framework.bined.options.CodeAreaThemeOptions;
 import org.exbin.framework.bined.options.EditorOptions;
+import org.exbin.framework.bined.options.StatusOptions;
 import org.exbin.framework.bined.options.impl.CodeAreaOptionsImpl;
 import org.exbin.framework.bined.preferences.BinaryEditorPreferences;
+import org.exbin.framework.editor.text.EncodingsHandler;
 
 /**
  * Component for BinEd editor instances.
@@ -48,21 +59,41 @@ public class BinEdEditorComponent {
     private final CodeAreaColorsProfile defaultColorProfile;
 
     private BinEdComponentPanel componentPanel = new BinEdComponentPanel();
+    private JPanel wrapperPanel = new JPanel(new BorderLayout());
+    private final BinaryStatusPanel statusPanel = new BinaryStatusPanel();
 
     public BinEdEditorComponent() {
         ExtCodeArea codeArea = componentPanel.getCodeArea();
         defaultLayoutProfile = codeArea.getLayoutProfile();
         defaultThemeProfile = codeArea.getThemeProfile();
         defaultColorProfile = codeArea.getColorsProfile();
+
+        wrapperPanel.add(componentPanel, BorderLayout.CENTER);
+        wrapperPanel.add(statusPanel, BorderLayout.SOUTH);
+        wrapperPanel.revalidate();
     }
 
     public void setApplication(XBApplication application) {
 
     }
+    
+    public void setComponentPanel() {
+        
+    }
+
+    @Nonnull
+    public JComponent getComponent() {
+        return wrapperPanel;
+    }
 
     @Nonnull
     public BinEdComponentPanel getComponentPanel() {
         return componentPanel;
+    }
+
+    @Nonnull
+    public BinaryStatusPanel getStatusPanel() {
+        return statusPanel;
     }
 
     @Nonnull
@@ -114,6 +145,49 @@ public class BinEdEditorComponent {
         }
 
         CodeAreaColorOptions colorOptions = preferences.getColorPreferences();
+        int selectedColorProfile = colorOptions.getSelectedProfile();
+        if (selectedColorProfile >= 0) {
+            codeArea.setColorsProfile(colorOptions.getColorsProfile(selectedColorProfile));
+        } else {
+            codeArea.setColorsProfile(defaultColorProfile);
+        }
+    }
+
+    public void applyOptions(BinEdApplyOptions applyOptions, EncodingsHandler encodingsHandler, Font defaultFont) {
+        ExtCodeArea codeArea = componentPanel.getCodeArea();
+        CodeAreaOptionsImpl.applyToCodeArea(applyOptions.getCodeAreaOptions(), codeArea);
+
+        ((CharsetCapable) codeArea).setCharset(Charset.forName(applyOptions.getEncodingOptions().getSelectedEncoding()));
+        encodingsHandler.setEncodings(applyOptions.getEncodingOptions().getEncodings());
+        ((FontCapable) codeArea).setCodeFont(applyOptions.getFontOptions().isUseDefaultFont() ? defaultFont : applyOptions.getFontOptions().getFont(defaultFont));
+
+//        DataInspectorOptions dataInspectorOptions = applyOptions.getDataInspectorOptions();
+//        switchShowParsingPanel(dataInspectorOptions.isShowParsingPanel());
+        EditorOptions editorOptions = applyOptions.getEditorOptions();
+        if (codeArea.getCommandHandler() instanceof CodeAreaOperationCommandHandler) {
+            ((CodeAreaOperationCommandHandler) codeArea.getCommandHandler()).setEnterKeyHandlingMode(editorOptions.getEnterKeyHandlingMode());
+        }
+
+        StatusOptions statusOptions = applyOptions.getStatusOptions();
+        statusPanel.setStatusOptions(statusOptions);
+
+        CodeAreaLayoutOptions layoutOptions = applyOptions.getLayoutOptions();
+        int selectedLayoutProfile = layoutOptions.getSelectedProfile();
+        if (selectedLayoutProfile >= 0) {
+            codeArea.setLayoutProfile(layoutOptions.getLayoutProfile(selectedLayoutProfile));
+        } else {
+            codeArea.setLayoutProfile(defaultLayoutProfile);
+        }
+
+        CodeAreaThemeOptions themeOptions = applyOptions.getThemeOptions();
+        int selectedThemeProfile = themeOptions.getSelectedProfile();
+        if (selectedThemeProfile >= 0) {
+            codeArea.setThemeProfile(themeOptions.getThemeProfile(selectedThemeProfile));
+        } else {
+            codeArea.setThemeProfile(defaultThemeProfile);
+        }
+
+        CodeAreaColorOptions colorOptions = applyOptions.getColorOptions();
         int selectedColorProfile = colorOptions.getSelectedProfile();
         if (selectedColorProfile >= 0) {
             codeArea.setColorsProfile(colorOptions.getColorsProfile(selectedColorProfile));

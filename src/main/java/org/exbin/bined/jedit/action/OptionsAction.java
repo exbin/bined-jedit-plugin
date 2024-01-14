@@ -32,6 +32,7 @@ import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
+import org.exbin.bined.jedit.main.BinEdManager;
 import org.exbin.framework.bined.BinEdFileHandler;
 import org.exbin.framework.bined.gui.BinEdComponentPanel;
 
@@ -90,7 +91,8 @@ public class OptionsAction extends AbstractAction {
                 if (actionType == OptionsControlHandler.ControlActionType.SAVE) {
                     optionsPanel.saveToPreferences();
                 }
-//                editorPanel.applyOptions(optionsPanel);
+                BinEdManager binedManager = BinEdManager.getInstance();
+                fileHandler.getEditorComponent().applyOptions(optionsPanel, binedManager.getEncodingsHandler(), fileHandler.getDefaultFont());
                 fileHandler.switchFileHandlingMode(optionsPanel.getEditorOptions().getFileHandlingMode());
                 codeArea.repaint();
             }

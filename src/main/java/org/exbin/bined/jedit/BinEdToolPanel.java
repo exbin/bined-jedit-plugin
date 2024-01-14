@@ -173,7 +173,6 @@ public class BinEdToolPanel extends JPanel {
         AbstractButton copyToBufferButton = makeCustomButton("bined.copy-to-buffer", (ActionEvent evt) -> {
             editPanel.copyToBuffer();
         });
-        copyToBufferButton.setEnabled(false);
         add(copyToBufferButton);
 
         add(new JToolBar.Separator());

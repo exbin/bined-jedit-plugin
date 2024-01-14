@@ -95,6 +95,7 @@ public class BinEdFileManager {
 
         TextFontPreferences textFontPreferences = binaryEditorPreferences.getFontPreferences();
         ((FontCapable) codeArea).setCodeFont(textFontPreferences.isUseDefaultFont() ? CodeAreaPreferences.DEFAULT_FONT : textFontPreferences.getFont(CodeAreaPreferences.DEFAULT_FONT));
+        initCommandHandler(componentPanel);
     }
 
     public void initCommandHandler(BinEdComponentPanel componentPanel) {

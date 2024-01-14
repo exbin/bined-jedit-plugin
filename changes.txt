@@ -1,5 +1,10 @@
 0.2.1
--
+- Added convert data action
+- Added drag&drop content tool
+- Added support for basic macro
+- Added support for bookmarks
+- Added edit selection dialog
+- Added clipboard content dialog
 
 0.2.0 (2021-11-09)
 - Initial release

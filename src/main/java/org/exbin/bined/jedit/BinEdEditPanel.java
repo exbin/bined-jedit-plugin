@@ -21,7 +21,9 @@ import java.io.File;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
+import org.exbin.auxiliary.binary_data.BinaryData;
 import org.exbin.bined.jedit.main.BinEdManager;
 import org.exbin.framework.bined.BinEdFileHandler;
 import org.exbin.framework.bined.gui.BinEdComponentPanel;
@@ -32,6 +34,7 @@ import org.gjt.sp.jedit.View;
 import org.gjt.sp.jedit.browser.VFSBrowser;
 import org.gjt.sp.jedit.gui.DefaultFocusComponent;
 import org.gjt.sp.jedit.gui.DockableWindowManager;
+import org.gjt.sp.jedit.jEdit;
 
 /**
  * BinEd edit panel class.
@@ -54,10 +57,11 @@ public class BinEdEditPanel extends JPanel implements EBComponent, BinEdActions,
         super.setLayout(new BorderLayout());
         this.floating = position.equals(DockableWindowManager.FLOATING);
 
+        BinEdManager binedManager = BinEdManager.getInstance();
         editorFile = new BinEdFile();
         editorFile.setView(view);
 
-        BinEdComponentPanel editorFilePanel = editorFile.getPanel();
+        JComponent editorComponent = editorFile.getFileHandler().getEditorComponent().getComponent();
 
         this.toolPanel = new BinEdToolPanel(this);
         super.add(BorderLayout.NORTH, this.toolPanel);
@@ -66,11 +70,10 @@ public class BinEdEditPanel extends JPanel implements EBComponent, BinEdActions,
             super.setPreferredSize(new Dimension(500, 250));
         }
 
-        super.add(BorderLayout.CENTER, editorFilePanel);
+        super.add(BorderLayout.CENTER, editorComponent);
         editorFile.newFile();
         
-        BinEdManager binedManager = BinEdManager.getInstance();
-        toolPanel.setOptionsAction(binedManager.getOptionsAction(editorFile.getFileHandler()));
+        toolPanel.setOptionsAction(binedManager.createOptionsAction(editorFile.getFileHandler()));
     }
 
     @Override
@@ -103,7 +106,14 @@ public class BinEdEditPanel extends JPanel implements EBComponent, BinEdActions,
 
     @Override
     public void copyToBuffer() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        BinaryData contentData = editorFile.getFileHandler().getCodeArea().getContentData();
+        long dataSize = contentData.getDataSize();
+        if (dataSize < Integer.MAX_VALUE) {
+            byte[] data = new byte[(int) dataSize];
+            contentData.copyToArray(0, data, 0, (int) dataSize);
+            org.gjt.sp.jedit.Buffer buffer = jEdit.newFile((View) null);
+            buffer.insert(0, new String(data));
+        }
     }
 
     @Override

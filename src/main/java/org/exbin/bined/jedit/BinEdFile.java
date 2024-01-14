@@ -29,6 +29,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
+import javax.swing.JOptionPane;
 import org.exbin.auxiliary.binary_data.BinaryData;
 import org.exbin.auxiliary.binary_data.ByteArrayData;
 import org.exbin.auxiliary.binary_data.EditableBinaryData;
@@ -101,11 +102,32 @@ public class BinEdFile implements BinEdComponentFileApi {
         return fileHandler.isModified();
     }
 
+    /**
+     * Attempts to release current file and warn if document was modified.
+     *
+     * @return true if successful
+     */
     public boolean releaseFile() {
-        if (fileHandler.isModified()) {
-            throw new UnsupportedOperationException("Not supported yet.");
-//            FileModuleApi fileModule = application.getModuleRepository().getModuleByInterface(FileModuleApi.class);
-//            return fileModule.getFileActions().showAskForSaveDialog(fileHandler, fileTypes, this);
+        while (isModified() && fileHandler.isSaveSupported()) {
+            Object[] options = {
+                    "Save",
+                    "Discard",
+                    "Cancel"
+            };
+            int result = JOptionPane.showOptionDialog(fileHandler.getComponent(),
+                    "Document was modified! Do you wish to save it?",
+                    "Save File?",
+                    JOptionPane.YES_NO_CANCEL_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null, options, options[0]);
+            if (result == JOptionPane.NO_OPTION) {
+                return true;
+            }
+            if (result == JOptionPane.CANCEL_OPTION || result == JOptionPane.CLOSED_OPTION) {
+                return false;
+            }
+
+            saveDocument();
         }
 
         return true;
@@ -125,8 +147,6 @@ public class BinEdFile implements BinEdComponentFileApi {
         BinEdManager binEdManager = BinEdManager.getInstance();
         Application application = binEdManager.getApplication();
         application.setView(view);
-
-        // fileHandler.setView(view);
     }
 
     @Nonnull
