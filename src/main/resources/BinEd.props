@@ -1,6 +1,6 @@
 plugin.BinEdPlugin.name=BinEd
 plugin.BinEdPlugin.author=ExBin Project
-plugin.BinEdPlugin.version=0.2.0
+plugin.BinEdPlugin.version=0.2.1
 plugin.BinEdPlugin.docs=docs/index.html
 plugin.BinEdPlugin.description=Binary/hex editor based on BinEd library.
 plugin.BinEdPlugin.longdescription=description.html
@@ -41,7 +41,7 @@ bined.show-unprintables.selectedIcon=/org/exbin/bined/jedit/resources/icons/inse
 plugin.BinEdPlugin.menu=bined.edit-panel
 
 # Option Panes
-#options.bined.label=Hex Edit
+#options.bined.label=BinEd Plugin
 #plugin.BinEdPlugin.option-pane=bined.edit-panel
 #options.bined.code=new xptracker.options.XPTrackerOptionPane();
 

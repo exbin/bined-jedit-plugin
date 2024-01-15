@@ -116,6 +116,8 @@ public class CompareFilesAction extends AbstractAction {
 //            availableFiles.add(fileUri.isPresent() ? fileUri.get().toString() : panelResourceBundle.getString("unsavedFile"));
 //            compareFilesPanel.setAvailableFiles(availableFiles);
 //        }
+        List<String> availableFiles = new ArrayList<>();
+        compareFilesPanel.setAvailableFiles(availableFiles);
 
         BinedModule binedModule = application.getModuleRepository().getModuleByInterface(BinedModule.class);
         compareFilesPanel.setCodeAreaPopupMenu(binedModule.createCodeAreaPopupMenuHandler(BinedModule.PopupMenuVariant.BASIC));
@@ -139,7 +141,7 @@ public class CompareFilesAction extends AbstractAction {
                     pagedData.loadFromStream(stream);
                     return new CompareFilesPanel.FileRecord(result[0].getAbsolutePath(), pagedData);
                 } catch (IOException ex) {
-                    Logger.getLogger(org.exbin.bined.jedit.action.CompareFilesAction.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(CompareFilesAction.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 return null;
             }

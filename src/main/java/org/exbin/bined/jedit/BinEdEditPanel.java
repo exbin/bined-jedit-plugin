@@ -29,12 +29,14 @@ import org.exbin.framework.bined.BinEdFileHandler;
 import org.exbin.framework.bined.gui.BinEdComponentPanel;
 import org.gjt.sp.jedit.EBComponent;
 import org.gjt.sp.jedit.EBMessage;
+import org.gjt.sp.jedit.EditBus;
 import org.gjt.sp.jedit.GUIUtilities;
 import org.gjt.sp.jedit.View;
 import org.gjt.sp.jedit.browser.VFSBrowser;
 import org.gjt.sp.jedit.gui.DefaultFocusComponent;
 import org.gjt.sp.jedit.gui.DockableWindowManager;
 import org.gjt.sp.jedit.jEdit;
+import org.gjt.sp.jedit.msg.ViewUpdate;
 
 /**
  * BinEd edit panel class.
@@ -74,11 +76,16 @@ public class BinEdEditPanel extends JPanel implements EBComponent, BinEdActions,
         editorFile.newFile();
         
         toolPanel.setOptionsAction(binedManager.createOptionsAction(editorFile.getFileHandler()));
+//        EditBus.addToBus(this);
     }
 
     @Override
     public void handleMessage(EBMessage ebm) {
-
+//        if (ebm instanceof ViewUpdate) {
+//            if (((ViewUpdate) ebm).getWhat() == ViewUpdate.CLOSED) {
+//                editorFile.releaseFile();
+//            }
+//        }
     }
 
     @Override

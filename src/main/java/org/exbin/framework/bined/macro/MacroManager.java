@@ -448,4 +448,9 @@ public class MacroManager {
         menu.add(ActionUtils.actionToMenuItem(stopMacroRecordingAction));
         menu.add(ActionUtils.actionToMenuItem(manageMacrosAction));
     }
+
+    @Nonnull
+    public ExecuteLastMacroAction getExecuteLastMacroAction() {
+        return executeLastMacroAction;
+    }
 }

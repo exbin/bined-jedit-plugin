@@ -72,6 +72,10 @@ public class FindReplaceActions implements FileDependentAction {
         this.resourceBundle = resourceBundle;
     }
 
+    public void setEditorProvider(EditorProvider editorProvider) {
+        this.editorProvider = editorProvider;
+    }
+
     @Override
     public void updateForActiveFile() {
         Optional<FileHandler> activeFile = editorProvider.getActiveFile();

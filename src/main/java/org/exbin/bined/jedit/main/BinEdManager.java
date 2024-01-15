@@ -53,6 +53,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -78,6 +79,7 @@ import org.exbin.framework.bined.inspector.BinEdComponentInspector;
 import org.exbin.framework.bined.inspector.options.DataInspectorOptions;
 import org.exbin.framework.bined.inspector.options.impl.DataInspectorOptionsImpl;
 import org.exbin.framework.bined.macro.MacroManager;
+import org.exbin.framework.bined.macro.action.ExecuteLastMacroAction;
 import org.exbin.framework.bined.macro.action.ManageMacrosAction;
 import org.exbin.framework.bined.macro.operation.CodeAreaMacroCommandHandler;
 import org.exbin.framework.bined.operation.action.ConvertDataAction;
@@ -100,6 +102,7 @@ import org.exbin.framework.bined.tool.content.action.ClipboardContentAction;
 import org.exbin.framework.bined.tool.content.action.DragDropContentAction;
 import org.exbin.framework.editor.api.EditorProvider;
 import org.exbin.framework.editor.text.EncodingsHandler;
+import org.exbin.framework.editor.text.TextEncodingStatusApi;
 import org.exbin.framework.editor.text.options.TextEncodingOptions;
 import org.exbin.framework.editor.text.options.TextFontOptions;
 import org.exbin.framework.file.api.FileHandler;
@@ -145,6 +148,7 @@ public class BinEdManager {
         macroManager.setApplication(application);
         ((ManageMacrosAction) macroManager.getManageMacrosAction()).setMacroManager(macroManager);
         findReplaceActions = new FindReplaceActions();
+        findReplaceActions.setup(application, null, resourceBundle);
         encodingsHandler.setApplication(application);
 
         SimpleFillDataMethod simpleFillDataMethod = new SimpleFillDataMethod();
@@ -194,13 +198,12 @@ public class BinEdManager {
         bookmarksManager.init();
         macroManager.init();
         encodingsHandler.init();
-        encodingsHandler.setParentComponent(application.getView());
     }
 
     @Nonnull
     public void initFileHandler(BinEdFileHandler fileHandler) {
         BinEdComponentPanel componentPanel = fileHandler.getComponent();
-        BinEdEditorComponent editorComponent = new BinEdEditorComponent();
+        BinEdEditorComponent editorComponent = fileHandler.getEditorComponent();
         ExtCodeArea codeArea = componentPanel.getCodeArea();
 
         codeArea.setComponentPopupMenu(new JPopupMenu() {
@@ -261,6 +264,11 @@ public class BinEdManager {
                             }
                             break;
                         }
+                        case KeyEvent.VK_P: {
+                            ExecuteLastMacroAction executeLastMacroAction = macroManager.getExecuteLastMacroAction();
+                            executeLastMacroAction.actionPerformed(new ActionEvent(keyEvent.getSource(), keyEvent.getID(), ""));
+                            break;
+                        }
                     }
                 }
             }
@@ -300,10 +308,12 @@ public class BinEdManager {
                 if (newHandlingMode != fileHandlingMode) {
                     fileHandler.switchFileHandlingMode(newHandlingMode);
                     preferences.getEditorPreferences().setFileHandlingMode(newHandlingMode);
+                    updateCurrentMemoryMode(fileHandler);
                 }
             }
         });
         registerBinaryStatus(fileHandler);
+        registerEncodingStatus(statusPanel, fileHandler);
         bookmarksManager.registerBookmarksComponentActions(binedComponent);
         
         BinEdManager binedManager = BinEdManager.getInstance();
@@ -380,6 +390,27 @@ public class BinEdManager {
         return encodingsHandler;
     }
 
+    public void registerEncodingStatus(TextEncodingStatusApi encodingStatusApi, BinEdFileHandler fileHandler) {
+        ExtCodeArea codeArea = fileHandler.getCodeArea();
+        encodingsHandler.setSelectedEncoding(codeArea.getCharset().name());
+        encodingsHandler.setParentComponent(fileHandler.getComponent());
+        encodingsHandler.setTextEncodingStatus(new TextEncodingStatusApi() {
+            @Nonnull
+            @Override
+            public String getEncoding() {
+                return codeArea.getCharset().name();
+            }
+
+            @Override
+            public void setEncoding(String encodingName) {
+                codeArea.setCharset(Charset.forName(encodingName));
+                encodingStatusApi.setEncoding(encodingName);
+                // TODO preferences.getEncodingPreferences().setSelectedEncoding(encodingName);
+                //charsetChangeListener.charsetChanged();
+            }
+        });
+    }
+
     public void createContextMenu(ExtCodeArea codeArea, BinEdFileHandler fileHandler, final JPopupMenu menu, PopupMenuVariant variant, int x, int y) {
         BasicCodeAreaZone positionZone = codeArea.getPainter().getPositionZone(x, y);
         BinEdEditorComponent editorComponent = fileHandler.getEditorComponent();
@@ -388,6 +419,7 @@ public class BinEdManager {
         findReplaceActions.updateForActiveFile();
         bookmarksManager.setEditorProvider(editorProvider);
         macroManager.setEditorProvider(editorProvider);
+        findReplaceActions.setEditorProvider(editorProvider);
 
         if (variant == PopupMenuVariant.EDITOR) {
             switch (positionZone) {
@@ -738,7 +770,6 @@ public class BinEdManager {
     public ClipboardContentAction createClipboardContentAction(EditorProvider editorProvider) {
         ClipboardContentAction clipboardContentAction = new ClipboardContentAction();
         clipboardContentAction.setup(application, resourceBundle);
-        clipboardContentAction.setEditorProvider(editorProvider);
         return clipboardContentAction;
     }
 
@@ -746,7 +777,6 @@ public class BinEdManager {
     public DragDropContentAction createDragDropContentAction(EditorProvider editorProvider) {
         DragDropContentAction dragDropContentAction = new DragDropContentAction();
         dragDropContentAction.setup(application, resourceBundle);
-        dragDropContentAction.setEditorProvider(editorProvider);
         return dragDropContentAction;
     }
 
