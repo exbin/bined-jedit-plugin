@@ -1,4 +1,4 @@
-version = '0.2.1'
+version = '0.2.1.1'
 
 buildscript {
     repositories {
@@ -40,7 +40,7 @@ if (!gradle.startParameter.taskNames.any {it.endsWith("test")}) {
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {
-    classifier "tests"
+    archiveClassifier = 'tests'
     archiveBaseName = "test-${project.archivesBaseName}"
     from sourceSets.test.output
 }
@@ -54,7 +54,7 @@ artifacts {
 }
 
 task sourceJar(type: Jar) {
-    classifier = 'sources'
+    archiveClassifier = 'sources'
     from sourceSets.main.java
 }
 
@@ -65,7 +65,7 @@ javadoc {
 }
 
 task javadocJar (type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
     from javadoc.destinationDir
 }
 
@@ -80,21 +80,29 @@ repositories {
     }
 }
 
+def binedLibrary = { String libName ->
+    return (libName.endsWith('-SNAPSHOT')) ? ":${libName}-${binedVersion}" : "org.exbin.bined:${libName}:${binedVersion}"
+}
+
+def binaryDataLibrary = { String libName ->
+    return (libName.endsWith('-SNAPSHOT')) ? ":${libName}-${binaryDataVersion}" : "org.exbin.auxiliary:${libName}:${binaryDataVersion}"
+}
+
 dependencies {
     implementation ':jedit'
 
-    implementation ":bined-core-${binedVersion}"
-    implementation ":bined-extended-${binedVersion}"
-    implementation ":bined-highlight-swing-${binedVersion}"
-    implementation ":bined-operation-${binedVersion}"
-    implementation ":bined-operation-swing-${binedVersion}"
-    implementation ":bined-swing-${binedVersion}"
-    implementation ":bined-swing-extended-${binedVersion}"
-    implementation ":binary_data-${binaryDataVersion}"
-    implementation ":binary_data-paged-${binaryDataVersion}"
-    implementation ":binary_data-delta-${binaryDataVersion}"
+    implementation binedLibrary('bined-core')
+    implementation binedLibrary('bined-extended')
+    implementation binedLibrary('bined-highlight-swing')
+    implementation binedLibrary('bined-operation')
+    implementation binedLibrary('bined-operation-swing')
+    implementation binedLibrary('bined-swing')
+    implementation binedLibrary('bined-swing-extended')
+    implementation binaryDataLibrary('binary_data')
+    implementation binaryDataLibrary('binary_data-paged')
+    implementation binaryDataLibrary('binary_data-delta')
     implementation group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.70'
-    implementation ':jsr305-3.0.2'
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
     testImplementation group : 'junit', name: 'junit', version: '4.13.2'
 }
 

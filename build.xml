@@ -1,0 +1,38 @@
+<project name="BinEd" default="build">
+  <description>
+    This is an ant build.xml file for building the BinEd plugin for jEdit.
+  </description>
+
+  <property name="build.support" value="../../jEdit/build-support" />
+  <property file="build.properties"/>
+  <property file="../build.properties"/>
+  <property name="compiler.source" value="8" />
+  <property name="compiler.target" value="8" />
+  <property name="src.dir" value="src" />
+
+  <!--<property name="user-doc.xml" location = "users-guide.xml"/> -->
+  <import file="${build.support}/plugin-build.xml" />
+
+  <!-- Extra files that should be included in the jar -->
+  <selector id="packageFiles">
+    <or>
+        <filename name="src/dist/readme.txt" />
+        <filename name="actions.xml" />
+        <filename name="dockables.xml" />
+    </or>
+  </selector>
+
+  <!-- Add your plugin's specific dependencies here -->
+  <path id="project.class.path">
+    <pathelement path="build/lib/*.jar" />
+  </path>
+
+  <target name="build.prepare">
+    <!-- Copy over required dependencies to install.dir -->
+    <copy todir="${install.dir}">
+      <fileset dir="lib">
+         <filename name="*.jar"/>
+      </fileset>
+    </copy>
+  </target>
+</project>

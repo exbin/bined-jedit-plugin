@@ -1,3 +1,6 @@
+0.2.1.1
+- Fixes for jEdit Plugin Central
+
 0.2.1 (2024-01-15)
 - Added convert data action
 - Added clipboard content dialog

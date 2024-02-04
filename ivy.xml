@@ -1,0 +1,19 @@
+<ivy-module version="2.0">
+    <info organisation="jedit-plugins" module="BinEd"/>
+
+    <dependencies>
+	    <dependency org="org.exbin.bined" name="bined-core" rev="0.2.1"/>
+	    <dependency org="org.exbin.bined" name="bined-extended" rev="0.2.1"/>
+	    <dependency org="org.exbin.bined" name="bined-swing" rev="0.2.1"/>
+	    <dependency org="org.exbin.bined" name="bined-swing-extended" rev="0.2.1"/>
+	    <dependency org="org.exbin.bined" name="bined-highlight-swing" rev="0.2.1"/>
+	    <dependency org="org.exbin.bined" name="bined-operation" rev="0.2.1"/>
+	    <dependency org="org.exbin.bined" name="bined-operation-swing" rev="0.2.1"/>
+	    <dependency org="org.exbin.bined" name="bined-highlight-swing" rev="0.2.1"/>
+	    <dependency org="org.exbin.auxiliary" name="binary_data" rev="0.2.1"/>
+        <dependency org="org.exbin.auxiliary" name="binary_data-paged" rev="0.2.1"/>
+        <dependency org="org.exbin.auxiliary" name="binary_data-delta" rev="0.2.1"/>
+        <dependency org="org.bouncycastle" name="bcprov-jdk15on" rev="1.70"/>
+        <dependency org="com.google.code.findbugs" name="jsr305" rev="3.0.2"/>
+    </dependencies>
+</ivy-module>
