@@ -19,7 +19,7 @@ Features
 Instalation
 -----------
 
-Extract BinEdPlugin.jar into jars directory of your jedit instalation directory.
+Extract BinEdPlugin.jar and all library jar files into jars directory of your jEdit instalation directory.
 
 License
 -------

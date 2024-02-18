@@ -112,7 +112,16 @@ jar {
             'Main-Class': mainClass
         )
     }
+}
 
+task fatJar(type: Jar) {
+    manifest {
+        attributes(
+            'Main-Class': mainClass
+        )
+    }
+
+    archiveBaseName = 'bined-jedit-plugin-fat'
     from configurations.compileClasspath.findAll { it.name != 'jedit.jar' }.collect { it.isDirectory() ? it : zipTree(it) }
     destinationDirectory = file("$buildDir")
 }
@@ -133,6 +142,12 @@ distributions {
                 from project.jar.archivePath
                 include '*'
                 rename { filename -> "BinEdPlugin.jar" }
+            }
+
+            into('') {
+                from configurations.compileClasspath.findAll { !it.isDirectory() && it.name.endsWith('.jar') && it.name != 'jedit.jar' && it.name != 'jsr305-3.0.2.jar' }.collect { it }
+                include '*'
+                rename { filename -> filename.replace('-' + binedVersion + '.jar', '.jar').replace('-' + binaryDataVersion + '.jar', '.jar').replace('bcprov-jdk15on-1.70.jar','bcprov-jdk15on.jar') }
             }
         }
     }
