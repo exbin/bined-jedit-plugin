@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-
-<!DOCTYPE DOCKABLES SYSTEM "dockables.dtd">
-
-<DOCKABLES>
-    <DOCKABLE NAME="bined.edit-panel">
-        new org.exbin.bined.jedit.BinEdEditPanel(view, position);
-    </DOCKABLE>
-</DOCKABLES>
