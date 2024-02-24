@@ -35,4 +35,12 @@
     <delete file="/lib/jsr305-3.0.2.jar"/>
   </target>
 
+  <!-- put downloaded libs into dist folder -->
+  <target name="build.post">
+	<copy todir="${install.dir}">
+	  <fileset dir="build/lib" includes="*.jar" />
+	</copy>
+  </target>
+
+
 </project>
